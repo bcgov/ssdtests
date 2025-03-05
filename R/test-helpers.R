@@ -36,7 +36,11 @@ expect_snapshot_plot <- function(x, name) {
 }
 
 expect_snapshot_data <- function(x, name, digits = 6) {
-  fun <- function(x) signif(x, digits = digits)
+  fun <- function(x) {
+    if(!is.double(x))
+      return(x)
+    signif(x, digits = digits)
+  }
   lapply_fun <- function(x) I(lapply(x, fun))
   x <- dplyr::mutate(x, dplyr::across(dplyr::where(is.numeric), fun))
   x <- dplyr::mutate(x, dplyr::across(dplyr::where(is.list), lapply_fun))
