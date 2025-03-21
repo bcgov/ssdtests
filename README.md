@@ -21,8 +21,8 @@ You can install the development version of ssdtests from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("poissonconsulting/ssdtests")
+# install.packages("remotes")
+remotes::install_github("poissonconsulting/ssdtests")
 ```
 
 ## Licensing
