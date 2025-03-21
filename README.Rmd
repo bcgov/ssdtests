@@ -35,3 +35,4 @@ remotes::install_github("poissonconsulting/ssdtests")
 ```{r, results = "asis", echo = FALSE}
 cat(ssdtests::ssdtests_licensing_md())
 ```
+
