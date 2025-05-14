@@ -30,6 +30,7 @@ Depends:
 Imports:
     chk,
     dplyr,
+    envirotox,
     readr,
     ssddata (>= 1.0.0)
 Suggests:
@@ -39,6 +40,8 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     withr
+Remotes:
+    poissonconsulting/envirotox
 VignetteBuilder: 
     knitr
 Config/Needs/website: poissonconsulting/poissontemplate
