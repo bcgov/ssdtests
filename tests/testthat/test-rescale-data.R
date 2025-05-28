@@ -29,10 +29,9 @@ test_that("rescale data ssddata", {
 })
 
 test_that("rescale envirotox acute", {
-  dists <- c("burrIII3", "gamma", "gompertz", "lgumbel", "llogis", "llogis_llogis", 
-             "lnorm", "lnorm_lnorm", "weibull")
+  dists <- ssdtools::ssd_dists_bcanz()
   
-  data <- envirotox::envirotox_25_acute |>
+  data <- envirotox::envirotox_acute |>
     dplyr::nest_by(Chemical) |>
     dplyr::mutate(ssd_fit_unscale = list(ssdtools::ssd_fit_dists(data, dists = dists, silent = TRUE)),
                   ssd_fit_rescale = list(ssdtools::ssd_fit_dists(data, dists = dists, rescale = TRUE, silent = TRUE))) |>
@@ -42,7 +41,8 @@ test_that("rescale envirotox acute", {
            n_rescale = length(dists_rescale),
            max = length(dists))
 
-  expect_equal(nrow(data), 444L)
-  expect_equal(sum(data$n_unscale) / sum(data$max), 0.91, tolerance = 0.01)
-  expect_equal(sum(data$n_rescale) / sum(data$max), 0.92, tolerance = 0.01)
+  # do by distribution
+  expect_equal(nrow(data), 729L)
+  expect_equal(sum(data$n_unscale) / sum(data$max), 0.884, tolerance = 0.01)
+  expect_equal(sum(data$n_rescale) / sum(data$max), 0.931, tolerance = 0.01)
 })

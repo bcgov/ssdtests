@@ -4,7 +4,7 @@ test_that("averaging results", {
   for(i in seq_along(data_sets)) {
     suppressWarnings(fit <- ssdtools::ssd_fit_bcanz(data = data_sets[[i]]))
     results$multi[i] <- ssdtools::ssd_hc(fit)$est
-    results$weighted[i] <- ssdtools::ssd_hc(fit, multi_est = FALSE)$est
+    results$weighted[i] <- ssdtools::ssd_hc(fit, est_method = "arithmetic")$est
   }
   expect_snapshot_data(results, "averaging")
   results$change <- (results$multi - results$weighted) / results$weighted
