@@ -1,9 +1,9 @@
 pandoc: 3.1.11
-pkgdown: 2.1.2
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   ssdtests: ssdtests.html
-last_built: 2025-05-14T22:56Z
+last_built: 2025-05-28T14:23Z
 urls:
   reference: https://poissonconsulting.github.io/ssdtests/reference
   article: https://poissonconsulting.github.io/ssdtests/articles
