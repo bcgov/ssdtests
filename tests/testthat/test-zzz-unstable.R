@@ -65,7 +65,7 @@ test_that("weibull is unstable", {
 test_that("hc multi_ci lnorm default 100", {
   fits <- ssd_fit_dists(ssddata::ccme_boron)
   set.seed(102)
-  hc_average <- ssd_hc(fits, average = TRUE, ci = TRUE, nboot = 100, ci_method = "weighted_arithmetic", est_method = "arithmetic", samples = TRUE)
+  hc_average <- ssd_hc(fits, average = TRUE, ci = TRUE, nboot = 100, ci_method = "MACL", est_method = "arithmetic", samples = TRUE)
   set.seed(102)
   hc_multi <- ssd_hc(fits,
                      average = TRUE, ci_method = "multi_free", ci = TRUE, nboot = 100,

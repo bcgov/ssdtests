@@ -3,40 +3,44 @@
     Code
       hc_average
     Output
-      # A tibble: 1 x 11
-        dist    proportion   est    se   lcl   ucl    wt method    nboot pboot samples
-        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>     <dbl> <dbl> <I<lis>
-      1 average       0.05  1.24 0.743 0.479  3.19     1 parametr~   100     1 <dbl>  
+      # A tibble: 1 x 13
+        dist    proportion   est    se   lcl   ucl    wt est_method ci_method method  
+        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>     <chr>   
+      1 average       0.05  1.24 0.743 0.479  3.19     1 arithmetic MACL      paramet~
+      # i 3 more variables: nboot <dbl>, pboot <dbl>, samples <I<list>>
 
 ---
 
     Code
       hc_multi
     Output
-      # A tibble: 1 x 11
-        dist    proportion   est    se   lcl   ucl    wt method    nboot pboot samples
-        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>     <dbl> <dbl> <I<lis>
-      1 average       0.05  1.26 0.735 0.455  3.25     1 parametr~   100  0.99 <dbl>  
+      # A tibble: 1 x 13
+        dist    proportion   est    se   lcl   ucl    wt est_method ci_method  method 
+        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>      <chr>  
+      1 average       0.05  1.26 0.735 0.455  3.25     1 multi      multi_free parame~
+      # i 3 more variables: nboot <dbl>, pboot <dbl>, samples <I<list>>
 
 # hp multi_ci lnorm default 100
 
     Code
       hp_average
     Output
-      # A tibble: 1 x 11
-        dist     conc   est    se   lcl   ucl    wt method     nboot pboot samples    
-        <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <dbl> <dbl> <I<list>>  
-      1 average     1  3.90  2.32 0.738  9.57     1 parametric   100     1 <dbl [600]>
+      # A tibble: 1 x 13
+        dist     conc   est    se   lcl   ucl    wt est_method ci_method method  nboot
+        <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>     <chr>   <dbl>
+      1 average     1  3.90  2.32 0.738  9.57     1 multi      MACL      parame~   100
+      # i 2 more variables: pboot <dbl>, samples <I<list>>
 
 ---
 
     Code
       hp_multi
     Output
-      # A tibble: 1 x 11
-        dist     conc   est    se   lcl   ucl    wt method     nboot pboot samples   
-        <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <dbl> <dbl> <I<list>> 
-      1 average     1  3.90  2.46 0.347  9.22     1 parametric   100  0.99 <dbl [99]>
+      # A tibble: 1 x 13
+        dist     conc   est    se   lcl   ucl    wt est_method ci_method  method nboot
+        <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>      <chr>  <dbl>
+      1 average     1  3.90  2.46 0.347  9.22     1 multi      multi_free param~   100
+      # i 2 more variables: pboot <dbl>, samples <I<list>>
 
 # sgompertz completely unstable!
 
