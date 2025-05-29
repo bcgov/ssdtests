@@ -29,7 +29,7 @@ test_that("rescale data ssddata", {
 })
 
 test_that("rescale envirotox acute", {
-  dists <- ssdtools::ssd_dists_bcanz()
+  dists <- ssdtools::ssd_dists_all()
   
   data <- envirotox::envirotox_acute |>
     dplyr::nest_by(Chemical) |>
