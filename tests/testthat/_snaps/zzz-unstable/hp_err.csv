@@ -1,2 +1,2 @@
 dist,conc,est,se,lcl,ucl,wt,est_method,ci_method,boot_method,nboot,pboot,samples
-lnorm_lnorm,1,9.18262,5.52594,2.1596199999999998e-42,22.0162,1,multi,MACL,parametric,100,0.95,numeric(0)
+lnorm_lnorm,1,9.18262,5.52594,2.1596199999999998e-42,22.0162,1,NA,NA,parametric,100,0.95,numeric(0)
