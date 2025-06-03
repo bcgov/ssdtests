@@ -3,7 +3,7 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   rescaling: rescaling.html
-last_built: 2025-06-03T06:35Z
+last_built: 2025-06-03T06:40Z
 urls:
   reference: https://poissonconsulting.github.io/ssdtests/reference
   article: https://poissonconsulting.github.io/ssdtests/articles
