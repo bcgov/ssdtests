@@ -1,16 +1,13 @@
 ---
-title: "Rescaling Effect on Distribution Fitting"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Rescaling Effect on Distribution Fitting}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: "Rescaling and Distribution Fitting"
+author: "Joe Thorley and Rebecca Fisher"
+date: '`r format(Sys.time(), "%Y-%m-%d", tz = "UTC")`'
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-collapse = TRUE,
-comment = "#>"
+  collapse = TRUE,
+  comment = "#>"
 )
 ```
 
@@ -24,7 +21,7 @@ To examine the extent to which model fitting is improved we fit the `r length(ss
 
 The R code that performs the analysis is as follows.
 
-Consistent with the default settings in `ssdtools` a distribution was considered to have successfully fitted if it had converged irrespective of whether the standard errors were computable for the estimates based on the likelihood or whether it was at a boundary.
+Consistent with the default settings in `ssdtools` a distribution was considered to have successfully fitted if it had converged irrespective of whether the standard errors were computable for the estimates based on the likelihood or whether a parameter was at a boundary.
 
 <!-- to quickly run the code on two datasets add `dplyr::slice(1:12) |>` after `envirotox::envirotox_acute |>` -->
 
@@ -63,18 +60,23 @@ results <- unscaled |>
   dplyr::inner_join(rescaled, by = "Distribution")
 ```
 
-## Results
+## Findings
 
 ```{r, echo = FALSE, tab.cap="The percentage of the acute datasets in the envirotox R data package to which the distribution was successfully fitted."}
 knitr::kable(results, digits = 1)
 ```
 
-## Discussion
+The results indicate that with the `r length(unique(envirotox::envirotox_acute$Chemical))` acute datasets considered, rescaling has little to no effect on fitting for all the currently implemented distributions with valid likelihoods with one exception.
+The exception is the gompertz distribution for which the fitting rate increases from `r round(results$Unscaled[results$Distribution == "gompertz"], 1)` to `r round(results$Rescaled[results$Distribution == "gompertz"], 1)` %.
+Despite substantial improvement for the gompertz the fitting rate is still only ~ `r round(results$Rescaled[results$Distribution == "gompertz"], -1)` % which is insufficient to warrant reconsideration of its inclusion in the default set.
 
-The results indicate that with the `r length(unique(envirotox::envirotox_acute$Chemical))` acute datasets considered, rescaling has little to no effect on fitting. The one exception is the gompertz distribution for which the fitting rate increases from `r round(results$Unscaled[results$Distribution == "gompertz"], 1)` to `r round(results$Rescaled[results$Distribution == "gompertz"], 1)`.
-Due to its known instability the gompertz distribution is not included in the default set.
-
-## Conclusions
+## Recommendations
 
 Rescaling the data has little to no effect on the fitting rate for the models in the default set.
 Consequently we recommend that the `ssd_fit_dists()` or `ssd_fit_burrlioz()` continue to use `rescale = FALSE` as the default value and that it remain the fixed option in the `ssd_fit_bcanz()` function.
+
+## Session Info
+
+```{r, echo = FALSE}
+sessioninfo::session_info()
+```

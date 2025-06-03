@@ -46,7 +46,7 @@ Remotes:
     poissonconsulting/envirotox
 VignetteBuilder: 
     knitr
-Config/Needs/website: poissonconsulting/poissontemplate
+Config/Needs/website: poissonconsulting/poissontemplate, rmarkdown
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
