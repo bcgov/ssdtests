@@ -1,5 +1,5 @@
 test_that("rescale data ssddata", {
-  data_sets <- ssd_data_sets()
+  data_sets <- ssddata:::ssd_data_sets()
   dists <- ssdtools::ssd_dists_all()
   
   fit_dists <- function(data, dists, rescale) {
