@@ -1,0 +1,70 @@
+---
+title: "Rescaling Effect on Distribution Fitting"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Rescaling Effect on Distribution Fitting}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+```
+
+```{r setup}
+library(ssdtests)
+```
+
+## Background
+
+By default `ssdtools` does not rescale data when fitting distributions so that the parameter estimates can be used directly to estimate the HCx values.
+However, if `rescale = TRUE` in the `ssd_fit_dists()` or `ssd_fit_burrlioz()` functions then the data is rescaled by dividing by the geometric mean of the minimum and maximum positive finite values.
+To examine the extent to which model fitting success is improved by fitting the `length(ssdtools::ssd_dists_all())` distributions currently implemented in `ssdtools` to the `r length(unique(envirotox::envirotox_acute$Chemical))` acute datasets in `envirotox` with and without rescaling.
+
+##
+
+```{r}
+library(ssdtools)
+library(envirotox)
+
+dists <- ssdtools::ssd_dists_all()
+
+data <- envirotox::envirotox_acute |>
+#  dplyr::slice(1:12) |>
+  dplyr::nest_by(Chemical) |>
+  dplyr::mutate(ssd_fit_unscale = list(ssdtools::ssd_fit_dists(data, dists = dists, silent = TRUE)),
+                ssd_fit_rescale = list(ssdtools::ssd_fit_dists(data, dists = dists, rescale = TRUE, silent = TRUE))) |>
+  dplyr::mutate(dists_unscale = list(names(ssd_fit_unscale)),
+                dists_rescale = list(names(ssd_fit_rescale))) |>
+  dplyr::select(!c(ssd_fit_unscale, ssd_fit_rescale))
+
+unscaled <- data |>
+  dplyr::select(Chemical, dists_unscale) |>
+  tidyr::unnest(dists_unscale) |>
+  dplyr::ungroup() |>
+  dplyr::count(dists_unscale) |>
+  dplyr::mutate(n = n / nrow(data) * 100) |>
+  dplyr::select(dist = dists_unscale, unscaled = n)
+
+rescaled <- data |>
+  dplyr::select(Chemical, dists_rescale) |>
+  tidyr::unnest(dists_rescale) |>
+  dplyr::ungroup() |>
+  dplyr::count(dists_rescale) |>
+  dplyr::mutate(n = n / nrow(data) * 100) |>
+  dplyr::select(dist = dists_rescale, rescaled = n)
+
+results <- unscaled |>
+  dplyr::inner_join(rescaled, by = "dist")
+```
+
+```{r, echo = FALSE}
+knitr::kable(results, digits = 1)
+```
+
+
+
+To examine
