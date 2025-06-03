@@ -1,5 +1,5 @@
 test_that("averaging results", {
-  data_sets <- ssddata::ssd_data_sets()
+  data_sets <- ssd_data_sets()
   results <- data.frame(item = names(data_sets))
   for(i in seq_along(data_sets)) {
     suppressWarnings(fit <- ssdtools::ssd_fit_bcanz(data = data_sets[[i]]))

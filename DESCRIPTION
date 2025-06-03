@@ -43,7 +43,6 @@ Suggests:
     tidyr,
     withr
 Remotes:
-    poissonconsulting/ssddata,
     poissonconsulting/ssdtools@dev,
     poissonconsulting/envirotox
 VignetteBuilder: 
