@@ -3,46 +3,46 @@
     Code
       hc_average
     Output
-      # A tibble: 1 x 13
+      # A tibble: 1 x 14
         dist    proportion   est    se   lcl   ucl    wt est_method ci_method
         <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>    
       1 average       0.05  1.24 0.743 0.479  3.19     1 arithmetic MACL     
-      # i 4 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
-      #   samples <I<list>>
+      # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
+      #   dists <list>, samples <list>
 
 ---
 
     Code
       hc_multi
     Output
-      # A tibble: 1 x 13
+      # A tibble: 1 x 14
         dist    proportion   est    se   lcl   ucl    wt est_method ci_method 
         <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>     
       1 average       0.05  1.26 0.735 0.455  3.25     1 multi      multi_free
-      # i 4 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
-      #   samples <I<list>>
+      # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
+      #   dists <list>, samples <I<list>>
 
 # hp multi_ci lnorm default 100
 
     Code
       hp_average
     Output
-      # A tibble: 1 x 13
+      # A tibble: 1 x 14
         dist     conc   est    se   lcl   ucl    wt est_method ci_method boot_method
         <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>     <chr>      
       1 average     1  3.90  2.32 0.738  9.57     1 multi      MACL      parametric 
-      # i 3 more variables: nboot <dbl>, pboot <dbl>, samples <I<list>>
+      # i 4 more variables: nboot <dbl>, pboot <dbl>, dists <list>, samples <list>
 
 ---
 
     Code
       hp_multi
     Output
-      # A tibble: 1 x 13
+      # A tibble: 1 x 14
         dist     conc   est    se   lcl   ucl    wt est_method ci_method  boot_method
         <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>      <chr>      
       1 average     1  3.90  2.46 0.347  9.22     1 multi      multi_free parametric 
-      # i 3 more variables: nboot <dbl>, pboot <dbl>, samples <I<list>>
+      # i 4 more variables: nboot <dbl>, pboot <dbl>, dists <list>, samples <list>
 
 # sgompertz completely unstable!
 
