@@ -28,10 +28,11 @@
       hp_average
     Output
       # A tibble: 1 x 14
-        dist     conc   est    se   lcl   ucl    wt est_method ci_method boot_method
-        <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>     <chr>      
-      1 average     1  3.90  2.32 0.738  9.57     1 multi      MACL      parametric 
-      # i 4 more variables: nboot <dbl>, pboot <dbl>, dists <list>, samples <list>
+        dist     conc    est     se     lcl    ucl    wt est_method ci_method
+        <chr>   <dbl>  <dbl>  <dbl>   <dbl>  <dbl> <dbl> <chr>      <chr>    
+      1 average     1 0.0390 0.0232 0.00738 0.0957     1 multi      MACL     
+      # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
+      #   dists <list>, samples <list>
 
 ---
 
@@ -39,10 +40,11 @@
       hp_multi
     Output
       # A tibble: 1 x 14
-        dist     conc   est    se   lcl   ucl    wt est_method ci_method  boot_method
-        <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>      <chr>      
-      1 average     1  3.90  2.46 0.347  9.22     1 multi      multi_free parametric 
-      # i 4 more variables: nboot <dbl>, pboot <dbl>, dists <list>, samples <list>
+        dist     conc    est     se     lcl    ucl    wt est_method ci_method 
+        <chr>   <dbl>  <dbl>  <dbl>   <dbl>  <dbl> <dbl> <chr>      <chr>     
+      1 average     1 0.0390 0.0246 0.00347 0.0922     1 multi      multi_free
+      # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
+      #   dists <list>, samples <I<list>>
 
 # sgompertz completely unstable!
 

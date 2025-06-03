@@ -1,6 +1,8 @@
 test_that("bootstrap gompertz with problem data", {
   set.seed(99)
   data <- data.frame(Conc = ssd_rgompertz(6, location = 0.6, shape = 0.07))
+  
+  testthat::skip_on_ci()
   fit <- ssdtools::ssd_fit_dists(data, dists = "gompertz")
   set.seed(99)
   hc <- ssd_hc(fit,

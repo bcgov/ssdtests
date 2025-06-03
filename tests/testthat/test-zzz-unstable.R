@@ -96,9 +96,9 @@ test_that("hc multi_ci lnorm default 100", {
 test_that("hp multi_ci lnorm default 100", {
   fits <- ssd_fit_dists(ssddata::ccme_boron)
   set.seed(102)
-  hp_average <- ssd_hp(fits, average = TRUE, ci = TRUE, nboot = 100, ci_method = "MACL", samples = TRUE)
+  hp_average <- ssd_hp(fits, proportion = TRUE, average = TRUE, ci = TRUE, nboot = 100, ci_method = "MACL", samples = TRUE)
   set.seed(102)
-  hp_multi <- ssd_hp(fits,
+  hp_multi <- ssd_hp(fits, proportion = TRUE,
                      average = TRUE, ci_method = "multi_free", ci = TRUE, nboot = 100,
                      min_pboot = 0.8, samples = TRUE
   )
@@ -525,10 +525,10 @@ test_that("ssd_hp cis with error", {
   data <- data.frame(Conc = conc)
   fit <- ssd_fit_dists(data, dists = "lnorm_lnorm", min_pmix = 0.1)
   expect_identical(attr(fit, "min_pmix"), 0.1)
-  expect_warning(hp_err <- ssd_hp(fit, conc = 1, ci = TRUE, ci_method = "multi_fixed", nboot = 100, min_pboot = 0.99))
+  expect_warning(hp_err <- ssd_hp(fit, proportion = TRUE, conc = 1, ci = TRUE, ci_method = "multi_fixed", nboot = 100, min_pboot = 0.99))
   expect_s3_class(hp_err, "tbl")
   expect_snapshot_data(hp_err, "hp_err_na")
-  hp_err <- ssd_hp(fit, conc = 1, ci = TRUE, nboot = 100, min_pboot = 0.92, ci_method = "MACL")
+  hp_err <- ssd_hp(fit, proportion = TRUE, conc = 1, ci = TRUE, nboot = 100, min_pboot = 0.92, ci_method = "MACL")
   expect_s3_class(hp_err, "tbl")
   expect_snapshot_data(hp_err, "hp_err")
 })
@@ -541,10 +541,10 @@ test_that("ssd_hp comparable parametric and non-parametric big sample size", {
   data <- data.frame(Conc = ssd_rlnorm(10000, 2, 1))
   fit <- ssd_fit_dists(data, dists = "lnorm")
   set.seed(10)
-  hp_para <- ssd_hp(fit, 1, ci = TRUE, nboot = 10, ci_method = "MACL", samples = TRUE)
+  hp_para <- ssd_hp(fit, 1, proportion = TRUE, ci = TRUE, nboot = 10, ci_method = "MACL", samples = TRUE)
   expect_snapshot_data(hp_para, "hp_para")
   set.seed(10)
-  hp_nonpara <- ssd_hp(fit, 1, ci = TRUE, nboot = 10, parametric = FALSE, ci_method = "MACL", samples = TRUE)
+  hp_nonpara <- ssd_hp(fit, 1, proportion = TRUE, ci = TRUE, nboot = 10, parametric = FALSE, ci_method = "MACL", samples = TRUE)
   expect_snapshot_data(hp_nonpara, "hp_nonpara")
 })
 
