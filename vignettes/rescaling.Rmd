@@ -14,57 +14,67 @@ comment = "#>"
 )
 ```
 
-```{r setup}
-library(ssdtests)
-```
+## Introduction
 
-## Background
+By default `ssdtools` does not rescale data when fitting distributions so that the parameter estimates can be used to directly estimate the HCx values.
+However, if `rescale = TRUE` in the `ssd_fit_dists()` or `ssd_fit_burrlioz()` functions then the data is rescaled by dividing by the geometric mean of the minimum and maximum positive finite values which may aid model fitting in some instances.
+To examine the extent to which model fitting is improved we fit the `r length(ssdtools::ssd_dists_all())` distributions with valid likelihoods currently implemented in `ssdtools` to the `r length(unique(envirotox::envirotox_acute$Chemical))` acute datasets in the `envirotox` R data package with and without rescaling.
 
-By default `ssdtools` does not rescale data when fitting distributions so that the parameter estimates can be used directly to estimate the HCx values.
-However, if `rescale = TRUE` in the `ssd_fit_dists()` or `ssd_fit_burrlioz()` functions then the data is rescaled by dividing by the geometric mean of the minimum and maximum positive finite values.
-To examine the extent to which model fitting success is improved by fitting the `length(ssdtools::ssd_dists_all())` distributions currently implemented in `ssdtools` to the `r length(unique(envirotox::envirotox_acute$Chemical))` acute datasets in `envirotox` with and without rescaling.
+## Methods
 
-##
+The R code that performs the analysis is as follows.
+
+Consistent with the default settings in `ssdtools` a distribution was considered to have successfully fitted if it had converged irrespective of whether the standard errors were computable for the estimates based on the likelihood or whether it was at a boundary.
+
+<!-- to quickly run the code on two datasets add `dplyr::slice(1:12) |>` after `envirotox::envirotox_acute |>` -->
 
 ```{r}
-library(ssdtools)
-library(envirotox)
-
 dists <- ssdtools::ssd_dists_all()
 
+fit_dists <- function(data, dists, rescale) {
+  ssdtools::ssd_fit_dists(data = data, dists = dists, rescale = rescale, computable = FALSE, at_boundary_ok = TRUE, silent = TRUE)
+}
+
 data <- envirotox::envirotox_acute |>
-#  dplyr::slice(1:12) |>
   dplyr::nest_by(Chemical) |>
-  dplyr::mutate(ssd_fit_unscale = list(ssdtools::ssd_fit_dists(data, dists = dists, silent = TRUE)),
-                ssd_fit_rescale = list(ssdtools::ssd_fit_dists(data, dists = dists, rescale = TRUE, silent = TRUE))) |>
+  dplyr::mutate(ssd_fit_unscale = list(fit_dists(.data$data, dists = dists, rescale = FALSE)),
+                ssd_fit_rescale = list(fit_dists(.data$data, dists = dists, rescale = TRUE))) |>
   dplyr::mutate(dists_unscale = list(names(ssd_fit_unscale)),
                 dists_rescale = list(names(ssd_fit_rescale))) |>
   dplyr::select(!c(ssd_fit_unscale, ssd_fit_rescale))
 
 unscaled <- data |>
-  dplyr::select(Chemical, dists_unscale) |>
-  tidyr::unnest(dists_unscale) |>
+  dplyr::select(Chemical, Distribution = dists_unscale) |>
+  tidyr::unnest(Distribution) |>
   dplyr::ungroup() |>
-  dplyr::count(dists_unscale) |>
+  dplyr::count(Distribution) |>
   dplyr::mutate(n = n / nrow(data) * 100) |>
-  dplyr::select(dist = dists_unscale, unscaled = n)
+  dplyr::select(Distribution, Unscaled = n)
 
 rescaled <- data |>
-  dplyr::select(Chemical, dists_rescale) |>
-  tidyr::unnest(dists_rescale) |>
+  dplyr::select(Chemical, Distribution = dists_rescale) |>
+  tidyr::unnest(Distribution) |>
   dplyr::ungroup() |>
-  dplyr::count(dists_rescale) |>
+  dplyr::count(Distribution) |>
   dplyr::mutate(n = n / nrow(data) * 100) |>
-  dplyr::select(dist = dists_rescale, rescaled = n)
+  dplyr::select(Distribution, Rescaled = n)
 
 results <- unscaled |>
-  dplyr::inner_join(rescaled, by = "dist")
+  dplyr::inner_join(rescaled, by = "Distribution")
 ```
 
-```{r, echo = FALSE}
+## Results
+
+```{r, echo = FALSE, tab.cap="The percentage of the acute datasets in the envirotox R data package to which the distribution was successfully fitted."}
 knitr::kable(results, digits = 1)
 ```
 
+## Discussion
 
+The results indicate that with the `r length(unique(envirotox::envirotox_acute$Chemical))` acute datasets considered, rescaling has little to no effect on fitting. The one exception is the gompertz distribution for which the fitting rate increases from `r round(results$Unscaled[results$Distribution == "gompertz"], 1)` to `r round(results$Rescaled[results$Distribution == "gompertz"], 1)`.
+Due to its known instability the gompertz distribution is not included in the default set.
 
-To examine
+## Conclusions
+
+Rescaling the data has little to no effect on the fitting rate for the models in the default set.
+Consequently we recommend that the `ssd_fit_dists()` or `ssd_fit_burrlioz()` continue to use `rescale = FALSE` as the default value and that it remain the fixed option in the `ssd_fit_bcanz()` function.

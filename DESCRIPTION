@@ -26,19 +26,20 @@ URL: https://github.com/poissonconsulting/ssdtests,
 BugReports: https://github.com/poissonconsulting/ssdtests/issues
 Depends: 
     R (>= 4.1),
-    ssdtools (>= 2.3.0.9002)
+    ssdtools (>= 2.3.0.9003)
 Imports:
     chk,
     dplyr,
-    envirotox,
     readr,
     ssddata (>= 1.0.0)
 Suggests:
+    envirotox,
     ggplot2,
     glue,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
+    tidyr,
     withr
 Remotes:
     poissonconsulting/ssdtools@dev,
