@@ -72,6 +72,9 @@ Rebecca Fisher</h4>
 
     
     
+<!-- To knit to pdf replace rmarkdown::html_vignette with rmarkdown::pdf_document -->
+<!-- To quickly run the code on two datasets add `dplyr::slice(1:12) |>` after `envirotox::envirotox_acute |>` -->
+<!-- The consecutive mutate calls in the pipe is to ensure code wrapping -->
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -95,19 +98,19 @@ distribution was considered to have successfully fitted if it had
 converged irrespective of whether the standard errors were computable
 for the estimates based on the likelihood or whether a parameter was at
 a boundary.</p>
-<!-- to quickly run the code on two datasets add `dplyr::slice(1:12) |>` after `envirotox::envirotox_acute |>` -->
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dists</span> <span class="op">&lt;-</span> <span class="fu">ssdtools</span><span class="fu">::</span><span class="fu"><a href="https://bcgov.github.io/ssdtools/reference/ssd_dists_all.html" class="external-link">ssd_dists_all</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit_dists</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">dists</span>, <span class="va">rescale</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu">ssdtools</span><span class="fu">::</span><span class="fu"><a href="https://bcgov.github.io/ssdtools/reference/ssd_fit_dists.html" class="external-link">ssd_fit_dists</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, dists <span class="op">=</span> <span class="va">dists</span>, rescale <span class="op">=</span> <span class="va">rescale</span>, computable <span class="op">=</span> <span class="cn">FALSE</span>, at_boundary_ok <span class="op">=</span> <span class="cn">TRUE</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">fit_dists</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">d</span>, <span class="va">r</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu">ssdtools</span><span class="fu">::</span><span class="fu"><a href="https://bcgov.github.io/ssdtools/reference/ssd_fit_dists.html" class="external-link">ssd_fit_dists</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, dists <span class="op">=</span> <span class="va">d</span>, rescale <span class="op">=</span> <span class="va">r</span>, </span>
+<span>                               computable <span class="op">=</span> <span class="cn">FALSE</span>, at_boundary_ok <span class="op">=</span> <span class="cn">TRUE</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">envirotox</span><span class="fu">::</span><span class="va"><a href="https://poissonconsulting.github.io/envirotox/reference/envirotox_acute.html" class="external-link">envirotox_acute</a></span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/nest_by.html" class="external-link">nest_by</a></span><span class="op">(</span><span class="va">Chemical</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ssd_fit_unscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu">fit_dists</span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">data</span>, dists <span class="op">=</span> <span class="va">dists</span>, rescale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                ssd_fit_rescale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu">fit_dists</span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">data</span>, dists <span class="op">=</span> <span class="va">dists</span>, rescale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>dists_unscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ssd_fit_unscale</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ssd_fit_unscale <span class="op">=</span> <span class="fu">fit_dists</span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">data</span>, d <span class="op">=</span> <span class="va">dists</span>, r <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>                ssd_fit_rescale <span class="op">=</span> <span class="fu">fit_dists</span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">data</span>, d <span class="op">=</span> <span class="va">dists</span>, r <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>                dists_unscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ssd_fit_unscale</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                dists_rescale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ssd_fit_rescale</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">ssd_fit_unscale</span>, <span class="va">ssd_fit_rescale</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -205,6 +208,7 @@ function.</p>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
+<p>The results were generated with the following packages.</p>
 <pre><code><span><span class="co">#&gt; <span style="color: #00BBBB; font-weight: bold;">─ Session info ───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt;  <span style="color: #555555; font-style: italic;">setting </span> <span style="color: #555555; font-style: italic;">value</span></span></span>
 <span><span class="co">#&gt;  version  R version 4.5.0 (2025-04-11)</span></span>
