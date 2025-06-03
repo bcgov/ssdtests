@@ -8,13 +8,17 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+  
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
 collapse = TRUE,
 comment = "#>"
 )
 ```
+
+<!-- To knit to pdf replace rmarkdown::html_vignette with rmarkdown::pdf_document -->
+<!-- To quickly run the code on two datasets add `dplyr::slice(1:12) |>` after `envirotox::envirotox_acute |>` -->
+<!-- The consecutive mutate calls in the pipe is to ensure code wrapping -->
 
 ## Introduction
 
@@ -28,20 +32,19 @@ The R code that performs the analysis is as follows.
 
 Consistent with the default settings in `ssdtools` a distribution was considered to have successfully fitted if it had converged irrespective of whether the standard errors were computable for the estimates based on the likelihood or whether a parameter was at a boundary.
 
-<!-- to quickly run the code on two datasets add `dplyr::slice(1:12) |>` after `envirotox::envirotox_acute |>` -->
-
 ```{r}
 dists <- ssdtools::ssd_dists_all()
 
-fit_dists <- function(data, dists, rescale) {
-  ssdtools::ssd_fit_dists(data = data, dists = dists, rescale = rescale, computable = FALSE, at_boundary_ok = TRUE, silent = TRUE)
+fit_dists <- function(data, d, r) {
+  list(ssdtools::ssd_fit_dists(data = data, dists = d, rescale = r, 
+                               computable = FALSE, at_boundary_ok = TRUE, silent = TRUE))
 }
 
 data <- envirotox::envirotox_acute |>
   dplyr::nest_by(Chemical) |>
-  dplyr::mutate(ssd_fit_unscale = list(fit_dists(.data$data, dists = dists, rescale = FALSE)),
-                ssd_fit_rescale = list(fit_dists(.data$data, dists = dists, rescale = TRUE))) |>
-  dplyr::mutate(dists_unscale = list(names(ssd_fit_unscale)),
+  dplyr::mutate(ssd_fit_unscale = fit_dists(.data$data, d = dists, r = FALSE),
+                ssd_fit_rescale = fit_dists(.data$data, d = dists, r = TRUE),
+                dists_unscale = list(names(ssd_fit_unscale)),
                 dists_rescale = list(names(ssd_fit_rescale))) |>
   dplyr::select(!c(ssd_fit_unscale, ssd_fit_rescale))
 
@@ -81,6 +84,8 @@ Rescaling the data has little to no effect on the fitting rate for the models in
 Consequently we recommend that the `ssd_fit_dists()` or `ssd_fit_burrlioz()` continue to use `rescale = FALSE` as the default value and that it remain the fixed option in the `ssd_fit_bcanz()` function.
 
 ## Session Info
+
+The results were generated with the following packages.
 
 ```{r, echo = FALSE}
 sessioninfo::session_info()
