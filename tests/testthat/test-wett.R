@@ -55,6 +55,7 @@ test_that("multiplication works", {
     ggplot2::geom_hline(yintercept = 0) +
     ggplot2::scale_x_continuous("(%)", labels = scales::percent) +
     ggplot2::scale_y_continuous("Bias (%)", labels = scales::percent) +
+    ggplot2::theme(legend.position = "bottom") +
     NULL
   
   expect_snapshot_plot(gp, "wett")
