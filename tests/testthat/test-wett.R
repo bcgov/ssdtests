@@ -6,7 +6,7 @@ test_that("odds scaling changes hc", {
   expect_identical(x, inv_odds(odds(x)))
   
   datas <- tibble::tibble(
-    Chemical = c("A", "B", "C"),
+    Sample_id = c("A", "B", "C"),
     complement = FALSE,
     odds = FALSE,
     data = list(
@@ -41,7 +41,7 @@ test_that("odds scaling changes hc", {
       )
     ) |>
     tidyr::unnest(hc) |>
-    dplyr::select(Chemical, complement, odds, proportion, est)
+    dplyr::select(Sample_id, complement, odds, proportion, est)
   
   gp <- datas |>
     dplyr::mutate(odds = dplyr::if_else(odds, "odds", "original"),
@@ -51,10 +51,12 @@ test_that("odds scaling changes hc", {
     ggplot2::ggplot() +
     ggplot2::facet_grid(complement~proportion) +
     ggplot2::aes(x=1/odds, y=bias) +
-    ggplot2::geom_point(ggplot2::aes(color = Chemical)) +
+    ggplot2::geom_point(ggplot2::aes(color = Sample_id)) +
     ggplot2::geom_hline(yintercept = 0) +
     ggplot2::theme(legend.position = "bottom") +
-    ggplot2::xlab("dilutions")
+    ggplot2::scale_x_log10() +
+    ggplot2::xlab("Number of estimated dilutions") +
+    ggplot2::ylab("Porportion of additional required dilutions")
   NULL
   
   expect_snapshot_plot(gp, "wett")
