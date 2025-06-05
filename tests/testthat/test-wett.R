@@ -1,4 +1,4 @@
-test_that("multiplication works", {
+test_that("odds scaling changes hc", {
   odds <- function(x){x / (1 - x)}
   inv_odds <- function(x){x / (x + 1)}
   
@@ -45,18 +45,17 @@ test_that("multiplication works", {
   
   gp <- datas |>
     dplyr::mutate(odds = dplyr::if_else(odds, "odds", "original"),
-                  complement = dplyr::if_else(complement, "complement", "original")) |>
+                  complement = dplyr::if_else(complement, "uppper tail", "lower tail")) |>
     tidyr::pivot_wider(names_from = odds, values_from = est) |>
-    dplyr::mutate(bias = (original - odds) / odds) |>
+    dplyr::mutate(bias = ((1/odds)/(1/original))-1) |>
     ggplot2::ggplot() +
-    ggplot2::facet_wrap(~complement+proportion, scales = "free") +
-    ggplot2::aes(x=odds, y=bias) +
+    ggplot2::facet_grid(complement~proportion) +
+    ggplot2::aes(x=1/odds, y=bias) +
     ggplot2::geom_point(ggplot2::aes(color = Chemical)) +
     ggplot2::geom_hline(yintercept = 0) +
-    ggplot2::scale_x_continuous("(%)", labels = scales::percent) +
-    ggplot2::scale_y_continuous("Bias (%)", labels = scales::percent) +
     ggplot2::theme(legend.position = "bottom") +
-    NULL
+    ggplot2::xlab("dilutions")
+  NULL
   
   expect_snapshot_plot(gp, "wett")
 })
