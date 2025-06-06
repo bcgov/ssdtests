@@ -43,10 +43,7 @@ With back-transformation achieved via the corresponding inverse function:
   inv_odds
 ```
 
-Here we compare undertaking an SSD based risk assessment using the toxicity data on their original scale, and ignoring the potential issue that these cannot theoretically take values of 1, whilst the candidate distribution set of `ssdtools` all assume the true underlying maximum is `Inf`. 
-
--	Carry out simulation studies to demonstrate the validity and/or impact of additional distribution(s)
--	Provide recommendations on the need to provide specific guidance on direct toxicity methodology, and appropriate statistical distribution(s).
+Here we compare undertaking an SSD based risk assessment using the toxicity data on their original scale, and ignoring the potential issue that these cannot theoretically take values of greater than 1, whilst all the distributions currently in `ssdtools` assume the true underlying maximum is `Inf`.
 
 ## Methods
 
@@ -59,7 +56,10 @@ x <- c(0.01, 0.2, 0.5, 0.8)
 testthat::expect_identical(x, inv_odds(odds(x)))
 ```
 
-Next, we define some hypothetical toxicity data, based on toxicity assessments of an effluent sample over time, expressed as a proportion of the tested sample. These data are based on a real world discharge example, however they are confidential, so we cannot share the context under which they were collected. However, for this particular case the values were all very low - in some cases much less than 1 percent sample (<0.01 when expressed as a proportion). As they are, these data can be used to asses the impact of accounting for bounding in the SSD in the case where input toxicity data are from the very left hand tail of their theoretical distribution and are therefore highly toxic.
+Next, we define some hypothetical toxicity data, based on toxicity assessments of an effluent sample over time, expressed as a proportion of the tested sample. 
+These data are based on a real world discharge example, however they are confidential, so we cannot share the context under which they were collected. 
+However, for this particular case the values were all very low - in some cases much less than 1 percent sample (<0.01 when expressed as a proportion). 
+As they are, these data can be used to asses the impact of accounting for bounding in the SSD in the case where input toxicity data are from the very left hand tail of their theoretical distribution and are therefore highly toxic.
 
 ```{r, echo=FALSE}
   datas <- tibble::tibble(
@@ -140,7 +140,7 @@ We obtained 80, 90, 95 and 99 species protection values (0.01, 0.05, 0.1 and 0.2
   
   datas <- datas |>
     dplyr::mutate(
-      fit = purrr::map(.data$data, ssd_fit_dists, dists = ssd_dists_bcanz(npars = 2L)),
+      fit = purrr::map(.data$data, ssd_fit_bcanz, dists = ssd_dists_bcanz(npars = 2L)),
       hc = purrr::map(.data$fit, ssd_hc, proportion = c(0.01, 0.05, 0.1, 0.2)),
       hc = purrr::map_if(
         .data$hc, .p = .data$odds, \(x) dplyr::mutate(x, across(c(est, lcl, ucl), inv_odds))
@@ -168,7 +168,7 @@ We obtained 80, 90, 95 and 99 species protection values (0.01, 0.05, 0.1 and 0.2
 
 ## Findings
 
-We found that there was a substantial difference in the number of dilutions required to meet the desired protection level for the 99 and 95% species protection targets, depending on if the data were modeled on their original scaling, compared to using the `odds` scaling. 
+We found that there was a substantial difference in the number of dilutions required to meet the desired protection level for the 99 and 95% species protection targets, depending on if the data were modeled on their original scaling which assumes they are unbounded, compared to using the `odds` scaling. 
 
 For both high and low toxicity data examples, performing the SSD modelling on the `odds` scaling resulted in a higher number of required dilutions compared to when the data are assumed to come from an unbounded distribution.
 
@@ -183,7 +183,8 @@ datas |>
   knitr::kable()
 ```
 
-Expressed as a proportion, the error in the number additional required dilutions tended to be higher for the low toxicity data (at the upper extreme of the distribution), compared to the low toxicity data. This is would be expected given that these are the toxicity data that are nearest to the upper bound of the distribution. However, because these represent extremely low toxicity examples, the realised number of required dilutions remains very low. For example, based on assuming no bounding, 1.2 dilutions would be required to meet the 99% protection target for the low toxicity example represented by Sample B, compared to 1.8 dilutions when modeled on the `odds` scale. 
+Expressed as a proportion, the bias in the number of additional required dilutions tended to be higher for the low toxicity data (at the upper extreme of the distribution), compared to the low toxicity data. 
+This would be expected given that these are the toxicity data that are nearest to the upper bound of the distribution. However, because these represent extremely low toxicity examples, the realised number of required dilutions remains very low. For example, based on assuming no bounding, 1.2 dilutions would be required to meet the 99% protection target for the low toxicity example represented by Sample B, compared to 1.8 dilutions when modeled on the `odds` scale. 
 
 While the proportions of required additional dilutions are lower for the high toxicity scenarios relative to the low toxicity scenarios,  the actual number of additional dilutions required can be very large. For example,  3,186 dilutions would be required to meet the 99% protection target for the high toxicity example for Sample C. In contrast 3,743 dilutions would be required when modeled on the `odds` scale.
 
@@ -195,8 +196,6 @@ gp
 ## Conclusions and Recommendations
 
 Accommodating bounding of the SSD using `odds` scaling changes the required number of dilutions to meet species protection targets, particularly when targeting relatively high protection values (e.g. 95 and 99% species protection). In particular, it appears that the target number of dilutions required to meet the protection values are underestimated when bounding is ignored, suggesting that current practice of ignoring the fact that toxicity values come from a bounded distribution in the case of whole effluent toxicity assessment may be resulting in the use of guideline values that do not meet the stated protection targets.
-
-Further research is required to understand if the proposed approach using `odds` scaling and then running the current suite of recommended distributions in SSDs for unbounded data is the most appropriate means of accommodating bounded effluent toxicity assessments. Alternative approaches may involve adding candidate bounded distribution(s) to (shiny)ssdtools.
 
 ## Session Info
 
