@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Rescaling and Distribution Fitting • ssdtests</title>
+<title>Using odds scaling to accomodate bounded SSDs via ssdtools • ssdtests</title>
 <!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
 <link href="../deps/Playfair_Display-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Rescaling and Distribution Fitting">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Using odds scaling to accomodate bounded SSDs via ssdtools">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -61,150 +61,507 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Rescaling and Distribution Fitting</h1>
-                        <h4 data-toc-skip class="author">Joe Thorley and
-Rebecca Fisher</h4>
+      <h1>Using odds scaling to accomodate bounded SSDs via ssdtools</h1>
+                        <h4 data-toc-skip class="author">Joe Thorley,
+Rebecca Fisher and David Fox</h4>
             
             <h4 data-toc-skip class="date">2025-06-06</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/poissonconsulting/ssdtests/blob/main/vignettes/rescaling.Rmd" class="external-link"><code>vignettes/rescaling.Rmd</code></a></small>
-      <div class="d-none name"><code>rescaling.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/poissonconsulting/ssdtests/blob/main/vignettes/bounded.Rmd" class="external-link"><code>vignettes/bounded.Rmd</code></a></small>
+      <div class="d-none name"><code>bounded.Rmd</code></div>
     </div>
 
     
     
 <!-- To knit to pdf replace rmarkdown::html_vignette with rmarkdown::pdf_document -->
-<!-- To quickly run the code on two datasets add `dplyr::slice(1:12) |>` after `envirotox::envirotox_acute |>` -->
-<!-- The consecutive mutate calls in the pipe is to ensure code wrapping -->
+<!-- The consecutive dplyr::mutate calls in the pipe is to ensure code wrapping -->
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>By default <code>ssdtools</code> does not rescale data when fitting
-distributions so that the parameter estimates can be used to directly
-estimate the HCx values. However, if <code>rescale = TRUE</code> in the
-<code>ssd_fit_dists()</code> or <code>ssd_fit_burrlioz()</code>
-functions then the data is rescaled by dividing by the geometric mean of
-the minimum and maximum positive finite values which may aid model
-fitting in some instances. To examine the extent to which model fitting
-is improved we fit the 9 distributions with valid likelihoods currently
-implemented in <code>ssdtools</code> to the 729 acute datasets in the
-<code>envirotox</code> R data package with and without rescaling.</p>
+<p>Currently <code>ssdtools</code> and the associated <code>shiny</code>
+only includes distributions that are positive (do not include 0) but can
+exceed 1. This is appropriate for most concentration data that are
+typically used to derive GVs. However, in the case of direct toxicity
+assessment of effluents with low toxicity which are inherently bounded
+between 0 and 1 (depending on whether they represent 0% or 100% sample)
+a different approach is required, using appropriately bounded
+statistical distribution(s) for the SSD.</p>
+<p>We hypothesize that while the impact of using SSDs unbounded to the
+right may be small for effluents with a high level of toxicity, this
+will be very high for effluents with low toxicity.</p>
+<p>While it may be possible to add candidate bounded distribution(s) to
+<code>(shiny)ssdtools</code>, such as the widely used
+<code>Beta()</code> distribution, this would involve substantial coding
+effort.</p>
+<p>An alternative would be to implement an appropriate transformation of
+the existing default distribution set to accommodate bounded data. One
+such appropriate transformation would be to use <code>odds</code>
+scaling. Transformation to the odds scale can be achieved using the
+following function:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="va">odds</span></span>
+<span><span class="co">#&gt; function (x) </span></span>
+<span><span class="co">#&gt; {</span></span>
+<span><span class="co">#&gt;     x/(1 - x)</span></span>
+<span><span class="co">#&gt; }</span></span></code></pre></div>
+<p>With back-transformation achieved via the corresponding inverse
+function:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="va">inv_odds</span></span>
+<span><span class="co">#&gt; function (x) </span></span>
+<span><span class="co">#&gt; {</span></span>
+<span><span class="co">#&gt;     x/(x + 1)</span></span>
+<span><span class="co">#&gt; }</span></span></code></pre></div>
+<p>Here we compare undertaking an SSD based risk assessment using the
+toxicity data on their original scale, and ignoring the potential issue
+that these cannot theoretically take values of greater than 1, whilst
+all the distributions currently in <code>ssdtools</code> assume the true
+underlying maximum is <code>Inf</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a>
 </h2>
 <p>The R code that performs the analysis is as follows.</p>
-<p>Consistent with the default settings in <code>ssdtools</code> a
-distribution was considered to have successfully fitted if it had
-converged irrespective of whether the standard errors were computable
-for the estimates based on the likelihood or whether a parameter was at
-a boundary.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dists</span> <span class="op">&lt;-</span> <span class="fu">ssdtools</span><span class="fu">::</span><span class="fu"><a href="https://bcgov.github.io/ssdtools/reference/ssd_dists_all.html" class="external-link">ssd_dists_all</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">fit_dists</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">d</span>, <span class="va">r</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu">ssdtools</span><span class="fu">::</span><span class="fu"><a href="https://bcgov.github.io/ssdtools/reference/ssd_fit_dists.html" class="external-link">ssd_fit_dists</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, dists <span class="op">=</span> <span class="va">d</span>, rescale <span class="op">=</span> <span class="va">r</span>, </span>
-<span>                               computable <span class="op">=</span> <span class="cn">FALSE</span>, at_boundary_ok <span class="op">=</span> <span class="cn">TRUE</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">envirotox</span><span class="fu">::</span><span class="va"><a href="https://poissonconsulting.github.io/envirotox/reference/envirotox_acute.html" class="external-link">envirotox_acute</a></span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/nest_by.html" class="external-link">nest_by</a></span><span class="op">(</span><span class="va">Chemical</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ssd_fit_unscale <span class="op">=</span> <span class="fu">fit_dists</span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">data</span>, d <span class="op">=</span> <span class="va">dists</span>, r <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
-<span>                ssd_fit_rescale <span class="op">=</span> <span class="fu">fit_dists</span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">data</span>, d <span class="op">=</span> <span class="va">dists</span>, r <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>                dists_unscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ssd_fit_unscale</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                dists_rescale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ssd_fit_rescale</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">ssd_fit_unscale</span>, <span class="va">ssd_fit_rescale</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">unscaled</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Chemical</span>, Distribution <span class="op">=</span> <span class="va">dists_unscale</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">Distribution</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">Distribution</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">n</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Distribution</span>, Unscaled <span class="op">=</span> <span class="va">n</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rescaled</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Chemical</span>, Distribution <span class="op">=</span> <span class="va">dists_rescale</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">Distribution</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">Distribution</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">n</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Distribution</span>, Rescaled <span class="op">=</span> <span class="va">n</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">unscaled</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="va">rescaled</span>, by <span class="op">=</span> <span class="st">"Distribution"</span><span class="op">)</span></span></code></pre></div>
+<p>First, we test that our transformation and inversion functions work
+as expected:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/equality-expectations.html" class="external-link">expect_identical</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu">inv_odds</span><span class="op">(</span><span class="fu">odds</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Next, we define some hypothetical toxicity data, based on toxicity
+assessments of an effluent sample over time, expressed as a proportion
+of the tested sample. These data are based on a real world discharge
+example, however they are confidential, so we cannot share the context
+under which they were collected. However, for this particular case the
+values were all very low - in some cases much less than 1 percent sample
+(&lt;0.01 when expressed as a proportion). As they are, these data can
+be used to asses the impact of accounting for bounding in the SSD in the
+case where input toxicity data are from the very left hand tail of their
+theoretical distribution and are therefore highly toxic.</p>
+<table style="width:100%;" class="table">
+<caption>Three highly toxic example datasets of
+no-significant-effect-concentration toxicity estimates for eleven
+species, across three different effluent samples. Data are a proportion
+of the sample.</caption>
+<colgroup>
+<col width="4%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="left">Spp</td>
+<td align="left">sp 1</td>
+<td align="left">sp 2</td>
+<td align="left">sp 3</td>
+<td align="left">sp 4</td>
+<td align="left">sp 5</td>
+<td align="left">sp 6</td>
+<td align="left">sp 7</td>
+<td align="left">sp 8</td>
+<td align="left">sp 9</td>
+<td align="left">sp 10</td>
+<td align="left">sp 11</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="left">0.00490</td>
+<td align="left">0.00450</td>
+<td align="left">0.00064</td>
+<td align="left">0.00330</td>
+<td align="left">0.00140</td>
+<td align="left">0.00051</td>
+<td align="left">0.00062</td>
+<td align="left">0.00260</td>
+<td align="left">0.00039</td>
+<td align="left">0.00520</td>
+<td align="left">0.01100</td>
+</tr>
+<tr class="odd">
+<td align="left">B</td>
+<td align="left">0.05500</td>
+<td align="left">0.04500</td>
+<td align="left">0.01100</td>
+<td align="left">0.01700</td>
+<td align="left">0.00940</td>
+<td align="left">0.00041</td>
+<td align="left">0.01500</td>
+<td align="left">0.00840</td>
+<td align="left">0.01500</td>
+<td align="left">0.05000</td>
+<td align="left">0.25000</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="left">0.02600</td>
+<td align="left">0.03000</td>
+<td align="left">0.01300</td>
+<td align="left">0.15000</td>
+<td align="left">0.06200</td>
+<td align="left">0.00035</td>
+<td align="left">0.00980</td>
+<td align="left">0.02200</td>
+<td align="left">0.11000</td>
+<td align="left">0.15000</td>
+<td align="left">0.07900</td>
+</tr>
+</tbody>
+</table>
+<div class="figure">
+<img src="bounded_files/figure-html/fig_hightox-1.png" alt="Density plots of the raw toxicity data for three highly toxic effluent samples." width="672"><p class="caption">
+Density plots of the raw toxicity data for three highly toxic effluent
+samples.
+</p>
+</div>
+<p>Toxicity estimates from effluent samples may also be on the upper
+tail of the possible theoretical values of between 0 and 100%. Real
+world examples might include testing of brine effluent, where some
+species are relatively insensitive to the elevated salinity and may
+return toxicity estimates at, or near 100%. To mimic such a scenario,
+here we simply take the complement to the lower tail toxicity data
+presented previously, by simply subtracting these observed probabilities
+from one.</p>
+<table style="width:100%;" class="table">
+<caption>Three low toxicity example datasets of
+no-significant-effect-concentration toxicity estimates for eleven
+species, across three different effluent samples. Data are a proportion
+of the sample.</caption>
+<colgroup>
+<col width="6%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="8%">
+<col width="9%">
+<col width="9%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="left">Spp</td>
+<td align="left">sp 1</td>
+<td align="left">sp 2</td>
+<td align="left">sp 3</td>
+<td align="left">sp 4</td>
+<td align="left">sp 5</td>
+<td align="left">sp 6</td>
+<td align="left">sp 7</td>
+<td align="left">sp 8</td>
+<td align="left">sp 9</td>
+<td align="left">sp 10</td>
+<td align="left">sp 11</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">1.00</td>
+<td align="left">0.99</td>
+<td align="left">0.99</td>
+</tr>
+<tr class="odd">
+<td align="left">B</td>
+<td align="left">0.95</td>
+<td align="left">0.96</td>
+<td align="left">0.99</td>
+<td align="left">0.98</td>
+<td align="left">0.99</td>
+<td align="left">1.00</td>
+<td align="left">0.98</td>
+<td align="left">0.99</td>
+<td align="left">0.98</td>
+<td align="left">0.95</td>
+<td align="left">0.75</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="left">0.97</td>
+<td align="left">0.97</td>
+<td align="left">0.99</td>
+<td align="left">0.85</td>
+<td align="left">0.94</td>
+<td align="left">1.00</td>
+<td align="left">0.99</td>
+<td align="left">0.98</td>
+<td align="left">0.89</td>
+<td align="left">0.85</td>
+<td align="left">0.92</td>
+</tr>
+</tbody>
+</table>
+<div class="figure">
+<img src="bounded_files/figure-html/fig_lowtox-1.png" alt="Density plots of the raw toxicity data for three low toxic effluent samples." width="672"><p class="caption">
+Density plots of the raw toxicity data for three low toxic effluent
+samples.
+</p>
+</div>
+<p>We used these three sets of low toxicity and high toxicity examples
+to examine how the estimated number of dilutions required to reach the
+different species protection values changed if we model these data on
+the <code>odds</code> scale to account for the fact that the samples
+come from a theoretically bounded distribution, compared to if we used
+the original as though they are from unbounded distributions.</p>
+<p>We fitted SSDs to both the original and <code>odds</code> transformed
+data, using the function <code>ssd_fit_bcanz()</code> from the
+<code>ssdtools</code> package in <code>R</code>, following the methods
+outlined in the updated Australian and New Zealand Guidelines for Marine
+and Freshwater Quality. The only change we made from the recommended
+defaults settings was to exclude the lognormal-lognormal mixture
+distribution, as this bi-modal distribution failed to fit to some of our
+example data.</p>
+<p>We obtained 80, 90, 95 and 99 species protection values (0.01, 0.05,
+0.1 and 0.2 probability quantiles) from the fitted SSDs for both the
+<code>odds</code> transformed and original fits. Based on the resulting
+estimated percentages of the effluent sample, we calculated the number
+of dilutions required to achieve each protection target.</p>
 </div>
 <div class="section level2">
 <h2 id="findings">Findings<a class="anchor" aria-label="anchor" href="#findings"></a>
 </h2>
+<p>We found that there was a substantial difference in the number of
+dilutions required to meet the desired protection level for the 99 and
+95% species protection targets, depending on if the data were modeled on
+their original scaling which assumes they are unbounded, compared to
+using the <code>odds</code> scaling.</p>
+<p>For both high and low toxicity data examples, performing the SSD
+modelling on the <code>odds</code> scaling resulted in a higher number
+of required dilutions compared to when the data are assumed to come from
+an unbounded distribution.</p>
 <table class="table">
-<caption>The percentage of the acute datasets in the envirotox R data
-package to which the distribution was successfully fitted.</caption>
+<caption>Number of required dilutions required</caption>
 <thead><tr class="header">
-<th align="left">Distribution</th>
-<th align="right">Unscaled</th>
-<th align="right">Rescaled</th>
+<th align="left">Sample_id</th>
+<th align="right">proportion</th>
+<th align="left">toxicity</th>
+<th align="right">original</th>
+<th align="right">odds</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">burrIII3</td>
-<td align="right">100.0</td>
-<td align="right">100.0</td>
+<td align="left">A</td>
+<td align="right">0.01</td>
+<td align="left">high toxicity</td>
+<td align="right">12400.334615</td>
+<td align="right">12462.907418</td>
 </tr>
 <tr class="even">
-<td align="left">gamma</td>
-<td align="right">100.0</td>
-<td align="right">100.0</td>
+<td align="left">A</td>
+<td align="right">0.05</td>
+<td align="left">high toxicity</td>
+<td align="right">3602.662073</td>
+<td align="right">3608.552642</td>
 </tr>
 <tr class="odd">
-<td align="left">lgumbel</td>
-<td align="right">100.0</td>
-<td align="right">100.0</td>
+<td align="left">A</td>
+<td align="right">0.10</td>
+<td align="left">high toxicity</td>
+<td align="right">2240.143162</td>
+<td align="right">2242.273474</td>
 </tr>
 <tr class="even">
-<td align="left">llogis</td>
-<td align="right">100.0</td>
-<td align="right">100.0</td>
+<td align="left">A</td>
+<td align="right">0.20</td>
+<td align="left">high toxicity</td>
+<td align="right">1323.234195</td>
+<td align="right">1323.714740</td>
 </tr>
 <tr class="odd">
-<td align="left">llogis_llogis</td>
-<td align="right">95.9</td>
-<td align="right">95.7</td>
+<td align="left">B</td>
+<td align="right">0.01</td>
+<td align="left">high toxicity</td>
+<td align="right">5581.959795</td>
+<td align="right">5955.621547</td>
 </tr>
 <tr class="even">
-<td align="left">lnorm</td>
-<td align="right">100.0</td>
-<td align="right">100.0</td>
+<td align="left">B</td>
+<td align="right">0.05</td>
+<td align="left">high toxicity</td>
+<td align="right">883.280182</td>
+<td align="right">913.213828</td>
 </tr>
 <tr class="odd">
-<td align="left">lnorm_lnorm</td>
-<td align="right">97.0</td>
-<td align="right">96.4</td>
+<td align="left">B</td>
+<td align="right">0.10</td>
+<td align="left">high toxicity</td>
+<td align="right">415.402067</td>
+<td align="right">428.420784</td>
 </tr>
 <tr class="even">
-<td align="left">weibull</td>
-<td align="right">100.0</td>
-<td align="right">100.0</td>
+<td align="left">B</td>
+<td align="right">0.20</td>
+<td align="left">high toxicity</td>
+<td align="right">186.197147</td>
+<td align="right">190.647411</td>
+</tr>
+<tr class="odd">
+<td align="left">C</td>
+<td align="right">0.01</td>
+<td align="left">high toxicity</td>
+<td align="right">3185.693513</td>
+<td align="right">3743.515970</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="right">0.05</td>
+<td align="left">high toxicity</td>
+<td align="right">508.724333</td>
+<td align="right">544.892565</td>
+</tr>
+<tr class="odd">
+<td align="left">C</td>
+<td align="right">0.10</td>
+<td align="left">high toxicity</td>
+<td align="right">227.998540</td>
+<td align="right">235.803906</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="right">0.20</td>
+<td align="left">high toxicity</td>
+<td align="right">98.370982</td>
+<td align="right">98.440106</td>
+</tr>
+<tr class="odd">
+<td align="left">A</td>
+<td align="right">0.01</td>
+<td align="left">low toxicity</td>
+<td align="right">1.011012</td>
+<td align="right">1.044030</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="right">0.05</td>
+<td align="left">low toxicity</td>
+<td align="right">1.008014</td>
+<td align="right">1.012973</td>
+</tr>
+<tr class="odd">
+<td align="left">A</td>
+<td align="right">0.10</td>
+<td align="left">low toxicity</td>
+<td align="right">1.006644</td>
+<td align="right">1.008188</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="right">0.20</td>
+<td align="left">low toxicity</td>
+<td align="right">1.005150</td>
+<td align="right">1.004913</td>
+</tr>
+<tr class="odd">
+<td align="left">B</td>
+<td align="right">0.01</td>
+<td align="left">low toxicity</td>
+<td align="right">1.186611</td>
+<td align="right">1.835735</td>
+</tr>
+<tr class="even">
+<td align="left">B</td>
+<td align="right">0.05</td>
+<td align="left">low toxicity</td>
+<td align="right">1.125466</td>
+<td align="right">1.229141</td>
+</tr>
+<tr class="odd">
+<td align="left">B</td>
+<td align="right">0.10</td>
+<td align="left">low toxicity</td>
+<td align="right">1.099455</td>
+<td align="right">1.131518</td>
+</tr>
+<tr class="even">
+<td align="left">B</td>
+<td align="right">0.20</td>
+<td align="left">low toxicity</td>
+<td align="right">1.072930</td>
+<td align="right">1.068471</td>
+</tr>
+<tr class="odd">
+<td align="left">C</td>
+<td align="right">0.01</td>
+<td align="left">low toxicity</td>
+<td align="right">1.234257</td>
+<td align="right">1.679255</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="right">0.05</td>
+<td align="left">low toxicity</td>
+<td align="right">1.169067</td>
+<td align="right">1.261149</td>
+</tr>
+<tr class="odd">
+<td align="left">C</td>
+<td align="right">0.10</td>
+<td align="left">low toxicity</td>
+<td align="right">1.140361</td>
+<td align="right">1.177828</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="right">0.20</td>
+<td align="left">low toxicity</td>
+<td align="right">1.108683</td>
+<td align="right">1.110628</td>
 </tr>
 </tbody>
 </table>
-<p>The results indicate that with the 729 acute datasets considered,
-rescaling has little to no effect on fitting for all the currently
-implemented distributions with valid likelihoods with one exception. The
-exception is the gompertz distribution for which the fitting rate
-increases from to %. Despite substantial improvement for the gompertz
-the fitting rate is still only ~ % which is insufficient to warrant
-reconsideration of its inclusion in the default set.</p>
+<p>Expressed as a proportion, the bias in the number of additional
+required dilutions tended to be higher for the low toxicity data (at the
+upper extreme of the distribution), compared to the low toxicity data.
+This would be expected given that these are the toxicity data that are
+nearest to the upper bound of the distribution. However, because these
+represent extremely low toxicity examples, the realised number of
+required dilutions remains very low. For example, based on assuming no
+bounding, 1.2 dilutions would be required to meet the 99% protection
+target for the low toxicity example represented by Sample B, compared to
+1.8 dilutions when modeled on the <code>odds</code> scale.</p>
+<p>While the proportions of required additional dilutions are lower for
+the high toxicity scenarios relative to the low toxicity scenarios, the
+actual number of additional dilutions required can be very large. For
+example, 3,186 dilutions would be required to meet the 99% protection
+target for the high toxicity example for Sample C. In contrast 3,743
+dilutions would be required when modeled on the <code>odds</code>
+scale.</p>
+<div class="figure">
+<img src="bounded_files/figure-html/unnamed-chunk-10-1.png" alt="Proportion of additional required dilutions based on SSDs fitted using the original data, when compared to SSDs fitted via odds scaling." width="672"><p class="caption">
+Proportion of additional required dilutions based on SSDs fitted using
+the original data, when compared to SSDs fitted via odds scaling.
+</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="recommendations">Recommendations<a class="anchor" aria-label="anchor" href="#recommendations"></a>
+<h2 id="conclusions-and-recommendations">Conclusions and Recommendations<a class="anchor" aria-label="anchor" href="#conclusions-and-recommendations"></a>
 </h2>
-<p>Rescaling the data has little to no effect on the fitting rate for
-the models in the default set. Consequently we recommend that the
-<code>ssd_fit_dists()</code> or <code>ssd_fit_burrlioz()</code> continue
-to use <code>rescale = FALSE</code> as the default value and that it
-remain the fixed option in the <code>ssd_fit_bcanz()</code>
-function.</p>
+<p>Accommodating bounding of the SSD using <code>odds</code> scaling
+changes the required number of dilutions to meet species protection
+targets, particularly when targeting relatively high protection values
+(e.g. 95 and 99% species protection). In particular, it appears that the
+target number of dilutions required to meet the protection values are
+underestimated when bounding is ignored, suggesting that current
+practice of ignoring the fact that toxicity values come from a bounded
+distribution in the case of whole effluent toxicity assessment may be
+resulting in the use of guideline values that do not meet the stated
+protection targets.</p>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
@@ -227,6 +584,7 @@ function.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB; font-weight: bold;">─ Packages ───────────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt;  <span style="color: #555555; font-style: italic;">package     </span> <span style="color: #555555; font-style: italic;">*</span> <span style="color: #555555; font-style: italic;">version   </span> <span style="color: #555555; font-style: italic;">date (UTC)</span> <span style="color: #555555; font-style: italic;">lib</span> <span style="color: #555555; font-style: italic;">source</span></span></span>
 <span><span class="co">#&gt;  abind          1.4-8      <span style="color: #555555;">2024-09-12</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  brio           1.1.5      <span style="color: #555555;">2024-04-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  bslib          0.9.0      <span style="color: #555555;">2025-01-30</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  cachem         1.1.0      <span style="color: #555555;">2024-05-16</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  chk            0.10.0     <span style="color: #555555;">2025-01-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
@@ -235,7 +593,6 @@ function.</p>
 <span><span class="co">#&gt;  desc           1.4.3      <span style="color: #555555;">2023-12-10</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  digest         0.6.37     <span style="color: #555555;">2024-08-19</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  dplyr          1.1.4      <span style="color: #555555;">2023-11-17</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
-<span><span class="co">#&gt;  envirotox      <span style="color: #BB00BB; font-weight: bold;">0.0.0.9001</span> <span style="color: #555555;">2025-06-06</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">Github (poissonconsulting/envirotox@c3dabe2)</span></span></span>
 <span><span class="co">#&gt;  evaluate       1.0.3      <span style="color: #555555;">2025-01-10</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  farver         2.1.2      <span style="color: #555555;">2024-05-13</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  fastmap        1.2.0      <span style="color: #555555;">2024-05-15</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
@@ -243,7 +600,7 @@ function.</p>
 <span><span class="co">#&gt;  furrr          0.3.1      <span style="color: #555555;">2022-08-15</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  future         1.49.0     <span style="color: #555555;">2025-05-09</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  generics       0.1.4      <span style="color: #555555;">2025-05-09</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
-<span><span class="co">#&gt;  ggplot2        3.5.2      <span style="color: #555555;">2025-04-09</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  ggplot2      * 3.5.2      <span style="color: #555555;">2025-04-09</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  globals        0.18.0     <span style="color: #555555;">2025-05-08</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  glue           1.8.0      <span style="color: #555555;">2024-09-30</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  goftest        1.2-3      <span style="color: #555555;">2021-10-07</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
@@ -252,6 +609,7 @@ function.</p>
 <span><span class="co">#&gt;  jquerylib      0.1.4      <span style="color: #555555;">2021-04-26</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  jsonlite       2.0.0      <span style="color: #555555;">2025-03-27</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  knitr          1.50       <span style="color: #555555;">2025-03-16</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  labeling       0.4.3      <span style="color: #555555;">2023-08-29</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  lattice        0.22-6     <span style="color: #555555;">2024-03-20</span> <span style="color: #555555;">[3]</span> <span style="color: #555555;">CRAN (R 4.5.0)</span></span></span>
 <span><span class="co">#&gt;  lifecycle      1.0.4      <span style="color: #555555;">2023-11-07</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  listenv        0.9.1      <span style="color: #555555;">2024-01-29</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
@@ -261,6 +619,7 @@ function.</p>
 <span><span class="co">#&gt;  pillar         1.10.2     <span style="color: #555555;">2025-04-05</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  pkgconfig      2.0.3      <span style="color: #555555;">2019-09-22</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  pkgdown        2.1.3      <span style="color: #555555;">2025-05-25</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">any (@2.1.3)</span></span></span>
+<span><span class="co">#&gt;  pkgload        1.4.0      <span style="color: #555555;">2024-06-28</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  plyr           1.8.9      <span style="color: #555555;">2023-10-02</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  purrr          1.0.4      <span style="color: #555555;">2025-02-05</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  R6             2.6.1      <span style="color: #555555;">2025-02-15</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
@@ -271,14 +630,16 @@ function.</p>
 <span><span class="co">#&gt;  Rdpack         2.6.4      <span style="color: #555555;">2025-04-09</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  rlang          1.1.6      <span style="color: #555555;">2025-04-11</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  rmarkdown      2.29       <span style="color: #555555;">2024-11-04</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  rprojroot      2.0.4      <span style="color: #555555;">2023-11-05</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  sass           0.4.10     <span style="color: #555555;">2025-04-11</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  scales         1.4.0      <span style="color: #555555;">2025-04-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  sessioninfo    1.2.3      <span style="color: #555555;">2025-02-05</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">any (@1.2.3)</span></span></span>
 <span><span class="co">#&gt;  ssddata        1.0.0      <span style="color: #555555;">2021-11-05</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
-<span><span class="co">#&gt;  ssdtools       <span style="color: #BB00BB; font-weight: bold;">2.3.0.9004</span> <span style="color: #555555;">2025-06-06</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">Github (poissonconsulting/ssdtools@55e99b4)</span></span></span>
+<span><span class="co">#&gt;  ssdtools     * <span style="color: #BB00BB; font-weight: bold;">2.3.0.9004</span> <span style="color: #555555;">2025-06-06</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">Github (poissonconsulting/ssdtools@55e99b4)</span></span></span>
 <span><span class="co">#&gt;  stringi        1.8.7      <span style="color: #555555;">2025-03-27</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  stringr        1.5.1      <span style="color: #555555;">2023-11-14</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  systemfonts    1.2.3      <span style="color: #555555;">2025-04-30</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  testthat       3.2.3      <span style="color: #555555;">2025-01-13</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  textshaping    1.0.1      <span style="color: #555555;">2025-05-01</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  tibble         3.2.1      <span style="color: #555555;">2023-03-20</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  tidyr          1.3.1      <span style="color: #555555;">2024-01-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
@@ -286,6 +647,7 @@ function.</p>
 <span><span class="co">#&gt;  TMB            1.9.17     <span style="color: #555555;">2025-03-10</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  universals     0.0.5      <span style="color: #555555;">2022-09-22</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  vctrs          0.6.5      <span style="color: #555555;">2023-12-01</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  waldo          0.6.1      <span style="color: #555555;">2024-11-07</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  withr          3.0.2      <span style="color: #555555;">2024-10-28</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  xfun           0.52       <span style="color: #555555;">2025-04-02</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
 <span><span class="co">#&gt;  yaml           2.3.10     <span style="color: #555555;">2024-07-26</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
@@ -293,6 +655,7 @@ function.</p>
 <span><span class="co">#&gt; <span style="color: #555555;"> [1] /home/runner/work/_temp/Library</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;"> [2] /opt/R/4.5.0/lib/R/site-library</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;"> [3] /opt/R/4.5.0/lib/R/library</span></span></span>
+<span><span class="co">#&gt;  <span style="color: #BBBBBB; background-color: #BB0000;">*</span> ── Packages attached to the search path.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB; font-weight: bold;">──────────────────────────────────────────────────────────────────────────────</span></span></span></code></pre>
 </div>
