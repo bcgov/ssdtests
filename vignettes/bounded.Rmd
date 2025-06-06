@@ -1,0 +1,206 @@
+---
+title: "Using odds scaling to accomodate bounded SSDs via ssdtools"
+author: "Joe Thorley, Rebecca Fisher and David Fox"
+date: '`r format(Sys.time(), "%Y-%m-%d", tz = "UTC")`'
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using odds scaling to accomodate bounded SSDs via ssdtools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+```{r setup, include = FALSE, warning=FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+library(ssdtools)
+library(ggplot2)
+odds <- function(x){x / (1 - x)}
+inv_odds <- function(x){x / (x + 1)}
+```
+
+<!-- To knit to pdf replace rmarkdown::html_vignette with rmarkdown::pdf_document -->
+<!-- The consecutive dplyr::mutate calls in the pipe is to ensure code wrapping -->
+
+## Introduction
+
+Currently `ssdtools` and the associated `shiny` only includes distributions that are positive (do not include 0) but can exceed 1. This is appropriate for most concentration data that are typically used to derive GVs. However, in the case of direct toxicity assessment of effluents with low toxicity which are inherently bounded between 0 and 1 (depending on whether they represent 0% or 100% sample) a different approach is required, using appropriately bounded statistical distribution(s) for the SSD. 
+
+We hypothesize that while the impact of using SSDs unbounded to the right may be small for effluents with a high level of toxicity, this will be very high for effluents with low toxicity.
+
+While it may be possible to add candidate bounded distribution(s) to `(shiny)ssdtools`, such as the widely used `Beta()` distribution, this would involve substantial coding effort. 
+
+An alternative would be to implement an appropriate transformation of the existing default distribution set to accommodate bounded data. One such appropriate transformation would be to use `odds` scaling. Transformation to the odds scale can be achieved using the following function:
+
+```{r}
+  odds
+```
+
+With back-transformation achieved via the corresponding inverse function:
+
+```{r}
+  inv_odds
+```
+
+Here we compare undertaking an SSD based risk assessment using the toxicity data on their original scale, and ignoring the potential issue that these cannot theoretically take values of greater than 1, whilst all the distributions currently in `ssdtools` assume the true underlying maximum is `Inf`.
+
+## Methods
+
+The R code that performs the analysis is as follows.
+
+First, we test that our transformation and inversion functions work as expected:
+
+```{r, echo=TRUE}
+x <- c(0.01, 0.2, 0.5, 0.8)
+testthat::expect_identical(x, inv_odds(odds(x)))
+```
+
+Next, we define some hypothetical toxicity data, based on toxicity assessments of an effluent sample over time, expressed as a proportion of the tested sample. 
+These data are based on a real world discharge example, however they are confidential, so we cannot share the context under which they were collected. 
+However, for this particular case the values were all very low - in some cases much less than 1 percent sample (<0.01 when expressed as a proportion). 
+As they are, these data can be used to asses the impact of accounting for bounding in the SSD in the case where input toxicity data are from the very left hand tail of their theoretical distribution and are therefore highly toxic.
+
+```{r, echo=FALSE}
+  datas <- tibble::tibble(
+    Sample_id = c("A", "B", "C"),
+    complement = FALSE,
+    odds = FALSE,
+    data = list(
+      tibble::tibble(Conc = c(0.00492, 0.00452, 0.00064, 0.00331, 0.0014, 
+                              0.00051, 0.00062, 0.00261, 0.00039, 
+                              0.00523, 0.0111),
+             Spp = paste("sp", 1:11)),
+      tibble::tibble(Conc = c(0.0549, 0.0449, 0.0111, 0.0173, 0.00939, 0.00041, 
+                              0.0152, 0.00837, 0.0152, 0.0504, 0.25),
+             Spp = paste("sp", 1:11)),
+      tibble::tibble(Conc = c(0.0256, 0.0299, 0.0132, 0.149, 0.0616, 0.00035,
+                              0.0098, 0.0225, 0.106, 0.149, 0.0787),
+             Spp = paste("sp", 1:11))
+    )
+  )
+```
+
+```{r, echo = FALSE, tab.cap="Three highly toxic example datasets of no-significant-effect-concentration toxicity estimates for eleven species, across three different effluent samples. Data are a proportion of the sample."}
+datas |> dplyr::select(Sample_id, data) |> tidyr::unnest(data) |> dplyr::mutate(Conc = signif(Conc, 2)) |> tidyr::pivot_wider(names_from = Sample_id, values_from = Conc) |> t() |>  knitr::kable(digits = 3)
+```
+
+```{r fig_hightox, fig.cap="Density plots of the raw toxicity data for three highly toxic effluent samples.", fig.width=7, echo=FALSE}
+datas |> 
+  tidyr::unnest(data) |> 
+  ggplot(aes(x=Conc, fill = Sample_id)) +
+    geom_density(alpha=0.5) +
+  scale_x_continuous("percent sample", labels = scales::percent) 
+```
+
+Toxicity estimates from effluent samples may also be on the upper tail of the possible theoretical values of between 0 and 100%. Real world examples might include testing of brine effluent, where some species are relatively insensitive to the elevated salinity and may return toxicity estimates at, or near 100%. To mimic such a scenario, here we simply take the complement to the lower tail toxicity data presented previously, by simply subtracting these observed probabilities from one.
+
+```{r, echo=FALSE}
+  datas <- datas |>
+    dplyr::bind_rows(
+      dplyr::mutate(
+        datas, 
+        complement = TRUE, 
+        data = purrr::map(data, \(x) dplyr::mutate(x, Conc = 1 - Conc))
+      )
+    )
+```
+
+```{r, echo = FALSE, tab.cap="Three low toxicity example datasets of no-significant-effect-concentration toxicity estimates for eleven species, across three different effluent samples. Data are a proportion of the sample."}
+datas |> dplyr::filter(complement == TRUE) |> dplyr::select(Sample_id, data) |> tidyr::unnest(data) |> dplyr::mutate(Conc = signif(Conc, 2)) |> tidyr::pivot_wider(names_from = Sample_id, values_from = Conc, id_cols = Spp) |> t() |>  knitr::kable()
+```
+
+
+```{r fig_lowtox, fig.cap="Density plots of the raw toxicity data for three low toxic effluent samples.", fig.width=7, echo=FALSE}
+datas |> 
+  dplyr::filter(complement == TRUE) |> 
+  dplyr::select(Sample_id, data) |> 
+  tidyr::unnest(data) |> 
+  ggplot(aes(x=Conc, fill = Sample_id)) +
+    geom_density(alpha=0.5) +
+  scale_x_continuous("percent sample", labels = scales::percent) 
+```
+
+We used these three sets of low toxicity and high toxicity examples to examine how the estimated number of dilutions required to reach the different species protection values changed if we model these data on the `odds` scale to account for the fact that the samples come from a theoretically bounded distribution, compared to if we used the original as though they are from unbounded distributions.
+
+We fitted SSDs to both the original and `odds` transformed data, using the function `ssd_fit_bcanz()` from the `ssdtools` package in `R`, following the methods outlined in the updated Australian and New Zealand Guidelines for Marine and Freshwater Quality. The only change we made from the recommended defaults settings was to exclude the lognormal-lognormal mixture distribution, as this bi-modal distribution failed to fit to some of our example data.
+
+We obtained 80, 90, 95 and 99 species protection values (0.01, 0.05, 0.1 and 0.2 probability quantiles) from the fitted SSDs for both the `odds` transformed and original fits. Based on the resulting estimated percentages of the effluent sample, we calculated the number of dilutions required to achieve each protection target.  
+
+
+```{r, echo=FALSE, include=FALSE}
+  datas <- datas |>
+    dplyr::bind_rows(
+      dplyr::mutate(
+        datas, 
+        odds = TRUE, 
+        data = purrr::map(data, \(x) dplyr::mutate(x, Conc = odds(Conc)))
+      )
+    )
+  
+  datas <- datas |>
+    dplyr::mutate(
+      fit = purrr::map(.data$data, ssd_fit_bcanz, dists = ssd_dists_bcanz(npars = 2L)),
+      hc = purrr::map(.data$fit, ssd_hc, proportion = c(0.01, 0.05, 0.1, 0.2)),
+      hc = purrr::map_if(
+        .data$hc, .p = .data$odds, \(x) dplyr::mutate(x, across(c(est, lcl, ucl), inv_odds))
+      )
+    ) |>
+    tidyr::unnest(hc) |>
+    dplyr::select(Sample_id, complement, odds, proportion, est)
+  
+  gp <- datas |>
+    dplyr::mutate(odds = dplyr::if_else(odds, "odds", "original"),
+                  complement = dplyr::if_else(complement, "low toxicity", "high toxicity")) |>
+    tidyr::pivot_wider(names_from = odds, values_from = est) |>
+    dplyr::mutate(bias = ((1/odds)/(1/original))-1) |>
+    ggplot() +
+    facet_grid(complement~proportion) +
+    aes(x=1/odds, y=bias) +
+    geom_point(aes(color = Sample_id)) +
+    geom_hline(yintercept = 0) +
+    theme(legend.position = "bottom") +
+    scale_x_log10() +
+    xlab("Number of estimated dilutions") +
+    ylab("Porportion of additional required dilutions")
+  NULL
+```
+
+## Findings
+
+We found that there was a substantial difference in the number of dilutions required to meet the desired protection level for the 99 and 95% species protection targets, depending on if the data were modeled on their original scaling which assumes they are unbounded, compared to using the `odds` scaling. 
+
+For both high and low toxicity data examples, performing the SSD modelling on the `odds` scaling resulted in a higher number of required dilutions compared to when the data are assumed to come from an unbounded distribution.
+
+```{r, echo = FALSE, tab.cap="Number of required dilutions required "}
+datas |>
+    dplyr::mutate(odds = dplyr::if_else(odds, "odds", "original"),
+                  toxicity = dplyr::if_else(complement, "low toxicity", "high toxicity")) |>
+    tidyr::pivot_wider(names_from = odds, values_from = est) |>
+    dplyr::mutate(odds=1/odds,
+                  original=1/original) |> 
+  dplyr::select(-complement) |> 
+  knitr::kable()
+```
+
+Expressed as a proportion, the bias in the number of additional required dilutions tended to be higher for the low toxicity data (at the upper extreme of the distribution), compared to the low toxicity data. 
+This would be expected given that these are the toxicity data that are nearest to the upper bound of the distribution. However, because these represent extremely low toxicity examples, the realised number of required dilutions remains very low. For example, based on assuming no bounding, 1.2 dilutions would be required to meet the 99% protection target for the low toxicity example represented by Sample B, compared to 1.8 dilutions when modeled on the `odds` scale. 
+
+While the proportions of required additional dilutions are lower for the high toxicity scenarios relative to the low toxicity scenarios,  the actual number of additional dilutions required can be very large. For example,  3,186 dilutions would be required to meet the 99% protection target for the high toxicity example for Sample C. In contrast 3,743 dilutions would be required when modeled on the `odds` scale.
+
+```{r, echo = FALSE, fig.cap="Proportion of additional required dilutions based on SSDs fitted using the original data, when compared to SSDs fitted via odds scaling.", fig.width=7}
+gp
+```
+
+
+## Conclusions and Recommendations
+
+Accommodating bounding of the SSD using `odds` scaling changes the required number of dilutions to meet species protection targets, particularly when targeting relatively high protection values (e.g. 95 and 99% species protection). In particular, it appears that the target number of dilutions required to meet the protection values are underestimated when bounding is ignored, suggesting that current practice of ignoring the fact that toxicity values come from a bounded distribution in the case of whole effluent toxicity assessment may be resulting in the use of guideline values that do not meet the stated protection targets.
+
+## Session Info
+
+The results were generated with the following packages.
+
+```{r, echo = FALSE}
+sessioninfo::session_info()
+```
