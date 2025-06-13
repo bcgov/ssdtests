@@ -56,7 +56,10 @@ x <- c(0.01, 0.2, 0.5, 0.8)
 testthat::expect_identical(x, inv_odds(odds(x)))
 ```
 
-Next, we define some hypothetical toxicity data, based on toxicity assessments of an effluent sample over time, expressed as a proportion of the tested sample. 
+Next, we explore some case studies based on toxicity assessments of an effluent sample over time, expressed as a proportion of the tested sample. 
+
+### Caste study 1
+
 These data are based on a real world discharge example, however they are confidential, so we cannot share the context under which they were collected. 
 However, for this particular case the values were all very low - in some cases much less than 1 percent sample (<0.01 when expressed as a proportion). 
 As they are, these data can be used to asses the impact of accounting for bounding in the SSD in the case where input toxicity data are from the very left hand tail of their theoretical distribution and are therefore highly toxic.
@@ -79,6 +82,30 @@ As they are, these data can be used to asses the impact of accounting for boundi
              Spp = paste("sp", 1:11))
     )
   )
+
+datas2 <- structure(list(Species = c("sp_1", "sp_1", "sp_1", "sp_1", "sp_1", 
+"sp_1", "sp_1", "sp_2", "sp_2", "sp_2", "sp_2", "sp_2", "sp_2", 
+"sp_2", "sp_3", "sp_3", "sp_3", "sp_3", "sp_3", "sp_3", "sp_3", 
+"sp_4", "sp_4", "sp_4", "sp_4", "sp_4", "sp_4", "sp_4", "sp_5", 
+"sp_5", "sp_5", "sp_5", "sp_5", "sp_5", "sp_5", "sp_6", "sp_6", 
+"sp_6", "sp_6", "sp_6", "sp_6", "sp_6", "sp_7", "sp_7", "sp_7", 
+"sp_7", "sp_7", "sp_7", "sp_7", "sp_8", "sp_8", "sp_8", "sp_8", 
+"sp_8", "sp_8", "sp_8"), Sample_ID = c("rep_1", "rep_2", "rep_3", 
+"rep_4", "rep_5", "rep_6", "rep_7", "rep_1", "rep_2", "rep_3", 
+"rep_4", "rep_5", "rep_6", "rep_7", "rep_1", "rep_2", "rep_3", 
+"rep_4", "rep_5", "rep_6", "rep_7", "rep_1", "rep_2", "rep_3", 
+"rep_4", "rep_5", "rep_6", "rep_7", "rep_1", "rep_2", "rep_3", 
+"rep_4", "rep_5", "rep_6", "rep_7", "rep_1", "rep_2", "rep_3", 
+"rep_4", "rep_5", "rep_6", "rep_7", "rep_1", "rep_2", "rep_3", 
+"rep_4", "rep_5", "rep_6", "rep_7", "rep_1", "rep_2", "rep_3", 
+"rep_4", "rep_5", "rep_6", "rep_7"), Conc = c(75, 100, 35.3, 
+42.8, 24.4, 52.7, 100, 38.4, 32.5, 23.9, 77.2, 22.3, 100, 100, 
+100, 4.1, 100, 24.8, 50.5, 23.4, 50.3, 12.6, 14.2, 9.8, 57.8, 
+11.2, 22.1, 16.3, 7.9, 6.5, 9.5, 32.9, 17.9, 15.8, 48.2, 14.2, 
+40.7, 13.1, 26.9, 14.8, 13, 80.6, 22.2, 100, 20.7, 100, 91.6, 
+75.3, 30.6, 13.7, 14.8, 8.2, 46.4, 30, 34.4, 28)), row.names = c(NA, 
+-56L), class = c("tbl_df", "tbl", "data.frame"))
+
 ```
 
 ```{r, echo = FALSE, tab.cap="Three highly toxic example datasets of no-significant-effect-concentration toxicity estimates for eleven species, across three different effluent samples. Data are a proportion of the sample."}
@@ -93,7 +120,11 @@ datas |>
   scale_x_continuous("percent sample", labels = scales::percent) 
 ```
 
-Toxicity estimates from effluent samples may also be on the upper tail of the possible theoretical values of between 0 and 100%. Real world examples might include testing of brine effluent, where some species are relatively insensitive to the elevated salinity and may return toxicity estimates at, or near 100%. To mimic such a scenario, here we simply take the complement to the lower tail toxicity data presented previously, by simply subtracting these observed probabilities from one.
+### Case study 2
+
+Toxicity estimates from effluent samples may also be on the upper tail of the possible theoretical values of between 0 and 100%. 
+Real world examples might include testing of brine effluent, where some species are relatively insensitive to the elevated salinity and may return toxicity estimates at, or near 100%. 
+To mimic such a scenario, here we simply take the complement to the lower tail toxicity data presented previously, by simply subtracting these observed probabilities from one.
 
 ```{r, echo=FALSE}
   datas <- datas |>
