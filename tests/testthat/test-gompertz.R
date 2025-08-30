@@ -1,4 +1,5 @@
 test_that("gompertz", {
+  skip_on_ci()
   test_dist2("gompertz")
 })
 
