@@ -28,7 +28,7 @@ save_csv <- function(x) {
 }
 
 expect_snapshot_plot <- function(x, name) {
-
+  
   path <- save_png(x)
   testthat::expect_snapshot_file(path, paste0(name, ".png"))
 }
