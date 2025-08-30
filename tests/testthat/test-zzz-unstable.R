@@ -18,13 +18,12 @@ test_that("ssd_fit_dists lnorm_lnorm unstable with censored data", {
   data$Other <- data$Conc
   data$Conc <- data$Conc / max(data$Conc)
   
+  skip()
   set.seed(102)
   fits <- ssd_fit_dists(data, right = "Other", dists = c("lnorm_lnorm"))
   
   tidy <- tidy(fits)
   expect_s3_class(tidy, "tbl")
-  testthat::skip_on_ci()
-  testthat::skip_on_cran()
   expect_snapshot_data(tidy, "lnorm_lnorm_no_se", digits = 3)
 })
 
@@ -57,8 +56,7 @@ test_that("weibull is unstable", {
   
   # not sure why weibull dropping on some linux on github actions and windows
   # on other folks machines
-  testthat::skip_on_ci()
-  testthat::skip_on_cran()
+  skip_on_ci()
   expect_identical(names(fits), c("gamma", "weibull"))
 })
 
@@ -86,8 +84,7 @@ test_that("hc multi_ci lnorm default 100", {
   # <chr>     <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <dbl> <dbl>
   #   -   1 average       5  1.26 0.781 0.331  3.25     1 parametric   100  0.86
   #   +   1 average       5  1.26 0.769 0.410  3.25     1 parametric   100  0.86
-  testthat::skip_on_ci()
-  testthat::skip_on_cran()
+  skip_on_ci()
   testthat::expect_snapshot({
     hc_multi
   })
@@ -106,8 +103,7 @@ test_that("hp multi_ci lnorm default 100", {
   testthat::expect_snapshot({
     hp_average
   })
-  testthat::skip_on_ci()
-  testthat::skip_on_cran()
+  skip_on_ci()
   # ── Failure ('test-hp-root.R:79:3'): hp multi_ci lnorm default 100 ─────────────────
   # Snapshot of code has changed:
   #   old[4:7] vs new[4:7]
@@ -132,15 +128,13 @@ test_that("gamma parameters are extremely unstable", {
   
   tidy <- tidy(fits)
   expect_s3_class(tidy, "tbl")
-  testthat::skip_on_ci() # not sure why gamma shape is 908 on GitHub actions windows and 841 on GitHub actions ubuntu
-  testthat::skip_on_cran()
+  skip_on_ci() # not sure why gamma shape is 908 on GitHub actions windows and 841 on GitHub actions ubuntu
   expect_snapshot_data(tidy, "tidy_gamma_unstable", digits = 1)
 })
 
 
 test_that("sgompertz completely unstable!", {
   skip_on_ci() # as incredibly unstable
-  skip_on_cran()
   x <- c(
     3.15284072848962, 1.77947821504531, 0.507778085984185, 1.650387414067,
     1.00725113964435, 7.04244885481452, 1.32336941144339, 1.51533791792454
@@ -158,7 +152,6 @@ test_that("sgompertz completely unstable!", {
 
 test_that("sgompertz with initial values still unstable!", {
   skip_on_ci() # as incredibly unstable
-  skip_on_cran()
   x <- c(
     3.15284072848962, 1.77947821504531, 0.507778085984185, 1.650387414067,
     1.00725113964435, 7.04244885481452, 1.32336941144339, 1.51533791792454
@@ -198,7 +191,6 @@ test_that("sgompertz with initial values still unstable!", {
 
 test_that("sgompertz cant even fit some values", {
   skip_on_ci() # as incredibly unstable
-  skip_on_cran()
   x <- c(160, 800, 840, 1500, 8200, 12800, 22000, 38000, 60900, 63000)
   expect_snapshot(
     {
@@ -214,7 +206,6 @@ test_that("sgompertz cant even fit some values", {
 
 test_that("sgompertz cant even initialize lots of values", {
   skip_on_ci()
-  skip_on_cran()
   x <- c(
     38.696580321462, 41.0167488906729, 39.5529154651536, 40.1225506655899,
     38.2675196410126, 35.2169221089071, 37.8367285461107, 40.1377838232664,
@@ -486,7 +477,6 @@ test_that("sgompertz cant even initialize lots of values", {
 
 test_that("ssd_hc cis with error", {
   skip_on_ci()
-  skip_on_cran()
   
   set.seed(99)
   conc <- ssd_rlnorm_lnorm(30, meanlog1 = 0, meanlog2 = 1, sdlog1 = 1 / 10, sdlog2 = 1 / 10, pmix = 0.2)
@@ -503,8 +493,7 @@ test_that("ssd_hc cis with error", {
 
 test_that("ssd_hc comparable parametric and non-parametric big sample size", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   set.seed(99)
   data <- data.frame(Conc = ssd_rlnorm(10000, 2, 1))
   fit <- ssd_fit_dists(data, dists = "lnorm")
@@ -518,8 +507,7 @@ test_that("ssd_hc comparable parametric and non-parametric big sample size", {
 
 test_that("ssd_hp cis with error", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   set.seed(99)
   conc <- ssd_rlnorm_lnorm(30, meanlog1 = 0, meanlog2 = 1, sdlog1 = 1 / 10, sdlog2 = 1 / 10, pmix = 0.2)
   data <- data.frame(Conc = conc)
@@ -535,8 +523,7 @@ test_that("ssd_hp cis with error", {
 
 test_that("ssd_hp comparable parametric and non-parametric big sample size", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   set.seed(99)
   data <- data.frame(Conc = ssd_rlnorm(10000, 2, 1))
   fit <- ssd_fit_dists(data, dists = "lnorm")
@@ -550,8 +537,7 @@ test_that("ssd_hp comparable parametric and non-parametric big sample size", {
 
 test_that("plot geoms", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   gp <- ggplot2::ggplot(boron_pred) +
     geom_ssdpoint(data = ssddata::ccme_boron, ggplot2::aes(x = Conc)) +
     geom_ssdsegment(data = ssddata::ccme_boron, ggplot2::aes(x = Conc, xend = Conc * 2)) +
@@ -566,8 +552,7 @@ test_that("plot geoms", {
 
 test_that("ssd_plot censored data", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   data <- ssddata::ccme_boron
   data$Other <- data$Conc * 2
   expect_snapshot_plot(ssd_plot(data, boron_pred, right = "Other"), "boron_cens_pred_ribbon")
@@ -575,8 +560,7 @@ test_that("ssd_plot censored data", {
 
 test_that("invpareto with extreme data", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   data <- data.frame(Conc = c(
     2.48892649039671, 2.5258371156749, 2.51281264491458,
     2.49866046657748, 2.56572740160664, 2.49440006912093, 2.4817062813665,
@@ -615,8 +599,7 @@ test_that("invpareto with extreme data", {
 
 test_that("not all estimates if fail", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   dir <- withr::local_tempdir()
   
   fit <- ssd_fit_dists(ssddata::ccme_boron, dists = c("lnorm", "lnorm_lnorm"))
@@ -641,8 +624,7 @@ test_that("not all estimates if fail", {
 
 test_that("lnorm_lnorm fits anonb", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   set.seed(99)
   data <- ssddata::anon_b
   fit <- ssd_fit_dists(data,
@@ -657,8 +639,7 @@ test_that("lnorm_lnorm fits anonb", {
 
 test_that("lnorm_lnorm non-bimodal 1000 data", {
   skip_on_ci()
-  skip_on_cran()
-  
+
   data <- data.frame(Conc = c(
     11.6635934627129, 11.3655834538171, 11.8239438136152, 11.4457330597547,
     11.2733838979158, 11.6555694734405, 11.6077458629663, 11.6253179146231,

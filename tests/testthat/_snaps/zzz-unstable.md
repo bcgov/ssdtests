@@ -3,10 +3,10 @@
     Code
       hc_average
     Output
-      # A tibble: 1 x 14
-        dist    proportion   est    se   lcl   ucl    wt est_method ci_method
-        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>    
-      1 average       0.05  1.24 0.743 0.479  3.19     1 arithmetic MACL     
+      # A tibble: 1 x 15
+        dist    proportion   est    se   lcl   ucl    wt level est_method ci_method
+        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>    
+      1 average       0.05  1.24 0.743 0.479  3.19     1  0.95 arithmetic MACL     
       # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
       #   dists <list>, samples <list>
 
@@ -15,10 +15,10 @@
     Code
       hc_multi
     Output
-      # A tibble: 1 x 14
-        dist    proportion   est    se   lcl   ucl    wt est_method ci_method 
-        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>     
-      1 average       0.05  1.26 0.735 0.455  3.25     1 multi      multi_free
+      # A tibble: 1 x 15
+        dist    proportion   est    se   lcl   ucl    wt level est_method ci_method 
+        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>     
+      1 average       0.05  1.26 0.735 0.455  3.25     1  0.95 multi      multi_free
       # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
       #   dists <list>, samples <I<list>>
 
@@ -27,10 +27,10 @@
     Code
       hp_average
     Output
-      # A tibble: 1 x 14
-        dist     conc    est     se     lcl    ucl    wt est_method ci_method
-        <chr>   <dbl>  <dbl>  <dbl>   <dbl>  <dbl> <dbl> <chr>      <chr>    
-      1 average     1 0.0390 0.0232 0.00738 0.0957     1 multi      MACL     
+      # A tibble: 1 x 15
+        dist     conc    est     se     lcl    ucl    wt level est_method ci_method
+        <chr>   <dbl>  <dbl>  <dbl>   <dbl>  <dbl> <dbl> <dbl> <chr>      <chr>    
+      1 average     1 0.0390 0.0232 0.00738 0.0957     1  0.95 multi      MACL     
       # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
       #   dists <list>, samples <list>
 
@@ -39,10 +39,10 @@
     Code
       hp_multi
     Output
-      # A tibble: 1 x 14
-        dist     conc    est     se     lcl    ucl    wt est_method ci_method 
-        <chr>   <dbl>  <dbl>  <dbl>   <dbl>  <dbl> <dbl> <chr>      <chr>     
-      1 average     1 0.0390 0.0246 0.00347 0.0922     1 multi      multi_free
+      # A tibble: 1 x 15
+        dist     conc    est     se     lcl    ucl    wt level est_method ci_method 
+        <chr>   <dbl>  <dbl>  <dbl>   <dbl>  <dbl> <dbl> <dbl> <chr>      <chr>     
+      1 average     1 0.0390 0.0246 0.00347 0.0922     1  0.95 multi      multi_free
       # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
       #   dists <list>, samples <I<list>>
 
