@@ -45,8 +45,9 @@ Suggests:
     tidyr,
     withr
 Remotes:
-    poissonconsulting/ssdtools@dev,
+    open-AIMS/ssddata,
     poissonconsulting/envirotox
+    poissonconsulting/ssdtools@dev,
 Config/Needs/website: poissonconsulting/poissontemplate, rmarkdown
 Config/testthat/edition: 3
 Encoding: UTF-8
