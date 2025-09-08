@@ -1,9 +1,9 @@
 test_that("ssd_hc passing all boots ccme_chloride lnorm_lnorm", {
   fits <- ssd_fit_dists(ssddata::ccme_chloride,
-                        min_pmix = 0.0001, at_boundary_ok = TRUE,
-                        dists = c("lnorm_lnorm", "llogis_llogis")
+    min_pmix = 0.0001, at_boundary_ok = TRUE,
+    dists = c("lnorm_lnorm", "llogis_llogis")
   )
-  
+
   withr::with_seed(102, {
     expect_warning(hc <- ssd_hc(fits, ci = TRUE, nboot = 1000, average = FALSE))
   })
@@ -25,8 +25,8 @@ test_that("ssd_hc cis with error and multiple dists", {
   expect_snapshot_boot_data(hc_err_two, "hc_err_two")
   withr::with_seed(99, {
     expect_warning(hc_err_avg <- ssd_hc(fit,
-                                        ci = TRUE, nboot = 100,
-                                        delta = 100, ci_method = "MACL"
+      ci = TRUE, nboot = 100,
+      delta = 100, ci_method = "MACL"
     ))
   })
   expect_snapshot_boot_data(hc_err_avg, "hc_err_avg")
@@ -46,8 +46,8 @@ test_that("ssd_hc cis with error and multiple dists", {
   expect_snapshot_boot_data(hc_err_two, "hc_err_two")
   withr::with_seed(99, {
     expect_warning(hc_err_avg <- ssd_hc(fit,
-                                        ci = TRUE, nboot = 100,
-                                        delta = 100, ci_method = "MACL"
+      ci = TRUE, nboot = 100,
+      delta = 100, ci_method = "MACL"
     ))
   })
   expect_snapshot_boot_data(hc_err_avg, "hc_err_avg")

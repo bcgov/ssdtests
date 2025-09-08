@@ -8,15 +8,16 @@ test_that("ssd_hp cis with error and multiple dists", {
   skip_on_ci()
   withr::with_seed(99, {
     expect_warning(hp_err_two <- ssd_hp(fit,
-                                        conc = 1, ci = TRUE, nboot = 100, average = FALSE,
-                                        delta = 100, proportion = FALSE
+      conc = 1, ci = TRUE, nboot = 100, average = FALSE,
+      delta = 100, proportion = FALSE
     ))
   })
   expect_snapshot_boot_data(hp_err_two, "hp_err_two")
   withr::with_seed(99, {
     expect_warning(hp_err_avg <- ssd_hp(fit,
-                                        conc = 1, ci = TRUE, nboot = 100,
-                                        delta = 100, ci_method = "MACL", proportion = FALSE))
+      conc = 1, ci = TRUE, nboot = 100,
+      delta = 100, ci_method = "MACL", proportion = FALSE
+    ))
   })
   expect_snapshot_boot_data(hp_err_avg, "hp_err_avg")
 })

@@ -17,7 +17,7 @@ save_png <- function(x, width = 400, height = 400) {
   grDevices::png(path, width = width, height = height)
   on.exit(grDevices::dev.off())
   print(x)
-  
+
   path
 }
 
@@ -30,7 +30,7 @@ save_csv <- function(x) {
 expect_snapshot_plot <- function(x, name) {
   testthat::skip_on_os("windows")
   testthat::skip_on_os("linux")
-  
+
   path <- save_png(x)
   testthat::expect_snapshot_file(path, paste0(name, ".png"))
 }
@@ -48,7 +48,7 @@ expect_snapshot_boot_data <- function(x, name, digits = 6, min_pboot = 0.9, max_
 
 expect_snapshot_data <- function(x, name, digits = 6) {
   fun <- function(x) {
-    if(!is.double(x))
+    if (!is.double(x))
       return(x)
     signif(x, digits = digits)
   }
@@ -68,8 +68,7 @@ ep <- function(text) {
 }
 
 test_dist2 <- function(dist, upadj = 0, multi = FALSE) {
-  
-  if(!multi) {
+  if (!multi) {
     withr::with_seed(97, {
       data <- data.frame(Conc = ep(glue::glue("ssd_r{dist}(500)")))
     })
@@ -80,12 +79,12 @@ test_dist2 <- function(dist, upadj = 0, multi = FALSE) {
     testthat::expect_identical(tidy$dist[1], dist)
     tidy$lower <- tidy$est - tidy$se * 3
     tidy$upper <- tidy$est + tidy$se * 3
-    
+
     default <- ep(glue::glue("formals(ssd_r{dist})"))
     default$n <- NULL
     default$chk <- NULL
     default <- data.frame(term = names(default), default = unlist(default))
-    
+
     tidy <- merge(tidy, default, by = "term", all = "TRUE")
     testthat::expect_true(all(tidy$default > tidy$lower - upadj))
     testthat::expect_true(all(tidy$default < tidy$upper + upadj))
