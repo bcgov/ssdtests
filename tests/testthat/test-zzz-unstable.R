@@ -17,11 +17,11 @@ test_that("ssd_fit_dists lnorm_lnorm unstable with censored data", {
   data <- ssddata::ccme_boron
   data$Other <- data$Conc
   data$Conc <- data$Conc / max(data$Conc)
-  
+
   skip()
   set.seed(102)
   fits <- ssd_fit_dists(data, right = "Other", dists = c("lnorm_lnorm"))
-  
+
   tidy <- tidy(fits)
   expect_s3_class(tidy, "tbl")
   expect_snapshot_data(tidy, "lnorm_lnorm_no_se", digits = 3)
@@ -46,14 +46,14 @@ test_that("weibull is unstable", {
     339.91458,
     437.52104
   ))
-  
+
   fits <- ssd_fit_dists(
     data = data,
     left = "Conc", dists = c("gamma", "weibull"),
     silent = TRUE, reweight = FALSE, min_pmix = 0, nrow = 6L,
     computable = TRUE, at_boundary_ok = FALSE, rescale = FALSE
   )
-  
+
   # not sure why weibull dropping on some linux on github actions and windows
   # on other folks machines
   skip_on_ci()
@@ -66,14 +66,14 @@ test_that("hc multi_ci lnorm default 100", {
   hc_average <- ssd_hc(fits, average = TRUE, ci = TRUE, nboot = 100, ci_method = "MACL", est_method = "arithmetic", samples = TRUE)
   set.seed(102)
   hc_multi <- ssd_hc(fits,
-                     average = TRUE, ci_method = "multi_free", ci = TRUE, nboot = 100,
-                     min_pboot = 0.8, samples = TRUE
+    average = TRUE, ci_method = "multi_free", ci = TRUE, nboot = 100,
+    min_pboot = 0.8, samples = TRUE
   )
-  
+
   testthat::expect_snapshot({
     hc_average
   })
-  
+
   # not sure why hc multi_ci is different on windows
   # ══ Failed tests ════════════════════════════════════════════════════════════════
   # ── Failure ('test-hc-root.R:77:3'): hc multi_ci lnorm default 100 ─────────────────
@@ -95,11 +95,12 @@ test_that("hp multi_ci lnorm default 100", {
   set.seed(102)
   hp_average <- ssd_hp(fits, proportion = TRUE, average = TRUE, ci = TRUE, nboot = 100, ci_method = "MACL", samples = TRUE)
   set.seed(102)
-  hp_multi <- ssd_hp(fits, proportion = TRUE,
-                     average = TRUE, ci_method = "multi_free", ci = TRUE, nboot = 100,
-                     min_pboot = 0.8, samples = TRUE
+  hp_multi <- ssd_hp(fits,
+    proportion = TRUE,
+    average = TRUE, ci_method = "multi_free", ci = TRUE, nboot = 100,
+    min_pboot = 0.8, samples = TRUE
   )
-  
+
   testthat::expect_snapshot({
     hp_average
   })
@@ -121,11 +122,11 @@ test_that("gamma parameters are extremely unstable", {
   data <- ssddata::ccme_boron
   data$Other <- data$Conc
   data$Conc <- data$Conc / max(data$Conc)
-  
+
   # gamma shape change from 913 to 868 on most recent version
   set.seed(102)
   fits <- ssd_fit_dists(data, dists = c("lnorm", "gamma"), right = "Other", rescale = FALSE, computable = FALSE)
-  
+
   tidy <- tidy(fits)
   expect_s3_class(tidy, "tbl")
   skip_on_ci() # not sure why gamma shape is 908 on GitHub actions windows and 841 on GitHub actions ubuntu
@@ -169,10 +170,10 @@ test_that("sgompertz with initial values still unstable!", {
   ))
   set.seed(10)
   fit <- ssd_fit_dists(data, dists = "gompertz")
-  
+
   sdata <- data.frame(left = x, right = x, weight = 1)
   pars <- estimates(fit$gompertz)
-  
+
   expect_snapshot({
     set.seed(94)
     ssdtools:::sgompertz(sdata)
@@ -477,7 +478,7 @@ test_that("sgompertz cant even initialize lots of values", {
 
 test_that("ssd_hc cis with error", {
   skip_on_ci()
-  
+
   set.seed(99)
   conc <- ssd_rlnorm_lnorm(30, meanlog1 = 0, meanlog2 = 1, sdlog1 = 1 / 10, sdlog2 = 1 / 10, pmix = 0.2)
   data <- data.frame(Conc = conc)
@@ -588,9 +589,9 @@ test_that("invpareto with extreme data", {
     2.52987952199996, 2.58987810707128, 2.46777896999791, 2.51447342615507,
     2.48618482994608, 2.51794970929166, 2.49716394702713, 2.49218587262049
   ))
-  
+
   fit99 <- ssd_fit_dists(data, dists = "invpareto")
-  
+
   expect_equal(
     estimates(fit99),
     list(invpareto.weight = 1, invpareto.scale = 2.61422138795731, invpareto.shape = 26.0278618888663)
@@ -601,12 +602,12 @@ test_that("not all estimates if fail", {
   skip_on_ci()
 
   dir <- withr::local_tempdir()
-  
+
   fit <- ssd_fit_dists(ssddata::ccme_boron, dists = c("lnorm", "lnorm_lnorm"))
   set.seed(49)
   hc <- ssd_hc(fit,
-               nboot = 10, ci = TRUE, ci_method = "multi_fixed",
-               parametric = TRUE, save_to = dir, min_pboot = 0.8, samples = TRUE
+    nboot = 10, ci = TRUE, ci_method = "multi_fixed",
+    parametric = TRUE, save_to = dir, min_pboot = 0.8, samples = TRUE
   )
   expect_snapshot_data(hc, "hc_notallestimates")
   expect_identical(list.files(dir), c(
@@ -628,10 +629,10 @@ test_that("lnorm_lnorm fits anonb", {
   set.seed(99)
   data <- ssddata::anon_b
   fit <- ssd_fit_dists(data,
-                       dists = c("lnorm_lnorm"),
-                       at_boundary_ok = FALSE, min_pmix = 0.05
+    dists = c("lnorm_lnorm"),
+    at_boundary_ok = FALSE, min_pmix = 0.05
   )
-  
+
   tidy <- tidy(fit)
   expect_snapshot_data(tidy, "tidy_anonb")
   expect_snapshot_plot(ssd_plot(data, predict(fit), ci = FALSE), "plot_anonb")

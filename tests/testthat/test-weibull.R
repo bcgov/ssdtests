@@ -9,7 +9,8 @@ test_that("weibull fails to converge", {
   skip_on_ci()
   withr::with_seed(97, {
     expect_warning(
-    fits <- ssdtools::ssd_fit_dists(data = data, dists = c("lnorm", "weibull")),
-    "Distribution 'weibull' failed to converge \\(try rescaling data\\): ERROR: ABNORMAL_TERMINATION_IN_LNSRCH.")
+      fits <- ssdtools::ssd_fit_dists(data = data, dists = c("lnorm", "weibull")),
+      "Distribution 'weibull' failed to converge \\(try rescaling data\\): ERROR: ABNORMAL_TERMINATION_IN_LNSRCH."
+    )
   })
 })
