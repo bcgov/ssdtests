@@ -31,8 +31,11 @@ Imports:
     chk,
     ssddata (>= 1.0.0)
 Suggests:
+    doFuture,
     dplyr,
     envirotox (>= 0.0.0.9002),
+    foreach,
+    future,
     ggplot2,
     glue,
     knitr,
