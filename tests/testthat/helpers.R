@@ -54,22 +54,25 @@ expect_snapshot_boot_data <- function(x, name, digits = 6, min_pboot = 0.9, max_
   expect_snapshot_data(x, name, digits = digits)
 }
 
-expect_snapshot_data <- function(x, name, digits = 6) {
-  fun <- function(x) {
-    if (!is.double(x))
-      return(x)
-    signif(x, digits = digits)
-  }
+expect_snapshot_data <- function(x, name, digits = 6, delist = FALSE) {
+  fun <- function(x) if(is.numeric(x)) signif(x, digits = digits) else x
   lapply_fun <- function(x) I(lapply(x, fun))
-  x <- dplyr::mutate(x, dplyr::across(dplyr::where(is.numeric), fun))
+  x <- dplyr::mutate(x, dplyr::across(where(is.numeric), fun))
+
+  if(!delist) {
+    lapply_fun <- function(x) I(lapply(x, fun))
   x <- dplyr::mutate(x, dplyr::across(dplyr::where(is.list), lapply_fun))
-  path <- save_csv(x)
+  } else {
+      n <- nrow(x)
+      x <- dplyr::mutate(x, dplyr::across(where(is.list), \(.x) rep("list", n)))
+  }
+   path <- save_csv(x)
   testthat::expect_snapshot_file(
     path,
     paste0(name, ".csv"),
     compare = testthat::compare_file_text
   )
-}
+  }
 
 ep <- function(text) {
   invisible(eval(parse(text = text)))
