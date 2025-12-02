@@ -27,7 +27,7 @@ BugReports: https://github.com/poissonconsulting/ssdtests/issues
 Depends: 
     R (>= 4.1),
     ssdsims,
-    ssdtools (>= 2.4.0),
+    ssdtools (>= 2.5.0.9003),
 Imports:
     chk,
     ssddata (>= 1.0.0)
