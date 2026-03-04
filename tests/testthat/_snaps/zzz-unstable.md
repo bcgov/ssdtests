@@ -138,7 +138,7 @@
       ssdtools:::sgompertz(data.frame(left = x, right = x), pars = c(12800, 1))
     Condition
       Error in `checkwz()`:
-      ! NAs found in the working weights variable 'wz'
+      ! NAs in the working weights var 'wz'
     Code
       ssdtools:::sgompertz(data.frame(left = x / 12800, right = x / 12800))
     Condition

@@ -3,4 +3,5 @@
 export(ssdtests_licensing_md)
 import(chk)
 import(ssddata)
+importFrom(ssdsims,ssd_sim_data)
 importFrom(ssdtools,ssd_fit_dists)
