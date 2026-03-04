@@ -40,14 +40,14 @@
 Source:
 [`DESCRIPTION`](https://github.com/poissonconsulting/ssdtests/blob/main/DESCRIPTION)
 
-Thorley J, Fisher R, Fox D, Schwarz C (2025). *ssdtests: Tests for
+Thorley J, Fisher R, Fox D, Schwarz C (2026). *ssdtests: Tests for
 ssdtools*. R package version 0.1.0,
 <https://github.com/poissonconsulting/ssdtests>.
 
     @Manual{,
       title = {ssdtests: Tests for ssdtools},
       author = {Joe Thorley and Rebecca Fisher and David Fox and Carl Schwarz},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.1.0},
       url = {https://github.com/poissonconsulting/ssdtests},
     }
