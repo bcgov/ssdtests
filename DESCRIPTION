@@ -26,7 +26,6 @@ URL: https://github.com/poissonconsulting/ssdtests,
 BugReports: https://github.com/poissonconsulting/ssdtests/issues
 Depends: 
     R (>= 4.1),
-    ssdsims,
     ssdtools (>= 2.6.0),
 Imports:
     chk,
@@ -52,12 +51,11 @@ Suggests:
 Remotes:
     open-AIMS/ssddata,
     poissonconsulting/envirotox,
-    poissonconsulting/ssdsims,
-    poissonconsulting/ssdtools@dev
+    poissonconsulting/ssdtools
 Config/Needs/website: poissonconsulting/poissontemplate, rmarkdown
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3.9000
+Config/roxygen2/version: 8.0.0.9000
