@@ -25,9 +25,9 @@ remotes::install_github("poissonconsulting/ssdtests")
 
 ## Licensing
 
-Copyright 2018-2025 Province of British Columbia  
-Copyright 2021-2025 Environment and Climate Change Canada  
-Copyright 2023-2025 Australian Government Department of Climate Change,
+Copyright 2018-2025 Province of British Columbia\
+Copyright 2021-2025 Environment and Climate Change Canada\
+Copyright 2023-2026 Australian Government Department of Climate Change,
 Energy, the Environment and Water
 
 The documentation is released under the [CC BY 4.0

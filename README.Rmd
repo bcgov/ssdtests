@@ -28,7 +28,7 @@ You can install the development version of ssdtests from [GitHub](https://github
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("poissonconsulting/ssdtests")
+pak::pak("bcgov/ssdtests")
 ```
 
 ```{r, results = "asis", echo = FALSE}
