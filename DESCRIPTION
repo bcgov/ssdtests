@@ -1,6 +1,6 @@
 Package: ssdtests
 Title: Tests for ssdtools
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
     person("Joe", "Thorley", , "joe@poissonconsulting.ca", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7683-4592")),
@@ -26,15 +26,13 @@ URL: https://github.com/poissonconsulting/ssdtests,
 BugReports: https://github.com/poissonconsulting/ssdtests/issues
 Depends: 
     R (>= 4.1),
-    ssdsims,
-    ssdtools (>= 2.6.0),
+    ssdtools (>= 2.6.0)
 Imports:
     chk,
     ssddata (>= 1.0.0)
 Suggests:
     doFuture,
     dplyr,
-    envirotox (>= 0.0.0.9002),
     foreach,
     future,
     ggplot2,
@@ -43,21 +41,19 @@ Suggests:
     purrr,
     readr,
     rmarkdown,
-    sessioninfo,
     testthat (>= 3.0.0),
     tibble,
     tidyr,
-    VGAM,
     withr
+VignetteBuilder: 
+    knitr
 Remotes:
     open-AIMS/ssddata,
-    poissonconsulting/envirotox,
-    poissonconsulting/ssdsims,
-    poissonconsulting/ssdtools@dev
+    poissonconsulting/ssdtools
 Config/Needs/website: poissonconsulting/poissontemplate, rmarkdown
+Config/roxygen2/version: 8.0.0.9000
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3.9000

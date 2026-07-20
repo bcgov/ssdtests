@@ -1,5 +1,6 @@
 .Rproj.user
 .Rhistory
+.claude/
 .RData
 .Ruserdata
 
@@ -14,3 +15,5 @@
 /inst/docs/
 /paper/paper.pdf
 inst/doc
+
+/.quarto/

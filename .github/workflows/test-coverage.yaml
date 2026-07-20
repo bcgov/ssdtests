@@ -1,18 +1,16 @@
-name: pkgdown
+name: test-coverage
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master, dev]
-  release:
-    types: [published]
-  workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
-  pkgdown:
-    uses: poissonconsulting/.github/.github/workflows/pkgdown.yaml@v1
+  test-coverage:
+    uses: poissonconsulting/.github/.github/workflows/test-coverage.yaml@v1
     with:
       cmdstan: false
+      tex: false
       private: false
     secrets: inherit

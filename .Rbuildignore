@@ -1,13 +1,14 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.claude$
 ^\.github$
 ^data-raw$
 ^docs$
 ^pkgdown$
 ^revdep$
 ^scripts$
-^codecov\.yml$
-^\.covrignore$
+^specs$
+^CONTRIBUTING\.md$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
 ^LICENSE\.md$

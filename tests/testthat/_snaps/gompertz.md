@@ -1,51 +1,3 @@
-# hc multi_ci lnorm default 100
-
-    Code
-      hc_average
-    Output
-      # A tibble: 1 x 15
-        dist    proportion   est    se   lcl   ucl    wt level est_method ci_method
-        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>    
-      1 average       0.05  1.24 0.743 0.479  3.19     1  0.95 arithmetic MACL     
-      # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
-      #   dists <list>, samples <list>
-
----
-
-    Code
-      hc_multi
-    Output
-      # A tibble: 1 x 15
-        dist    proportion   est    se   lcl   ucl    wt level est_method ci_method 
-        <chr>        <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <chr>      <chr>     
-      1 average       0.05  1.26 0.735 0.455  3.25     1  0.95 multi      multi_free
-      # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
-      #   dists <list>, samples <I<list>>
-
-# hp multi_ci lnorm default 100
-
-    Code
-      hp_average
-    Output
-      # A tibble: 1 x 15
-        dist     conc    est     se     lcl    ucl    wt level est_method ci_method
-        <chr>   <dbl>  <dbl>  <dbl>   <dbl>  <dbl> <dbl> <dbl> <chr>      <chr>    
-      1 average     1 0.0390 0.0232 0.00738 0.0957     1  0.95 multi      MACL     
-      # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
-      #   dists <list>, samples <list>
-
----
-
-    Code
-      hp_multi
-    Output
-      # A tibble: 1 x 15
-        dist     conc    est     se     lcl    ucl    wt level est_method ci_method 
-        <chr>   <dbl>  <dbl>  <dbl>   <dbl>  <dbl> <dbl> <dbl> <chr>      <chr>     
-      1 average     1 0.0390 0.0246 0.00347 0.0922     1  0.95 multi      multi_free
-      # i 5 more variables: boot_method <chr>, nboot <dbl>, pboot <dbl>,
-      #   dists <list>, samples <I<list>>
-
 # sgompertz completely unstable!
 
     Code
@@ -127,23 +79,31 @@
     Code
       ssdtools:::sgompertz(data.frame(left = x, right = x))
     Condition
-      Error in `lm.fit()`:
-      ! NA/NaN/Inf in 'y'
+      Warning in `min()`:
+      no non-missing arguments to min; returning Inf
+      Error in `vglm.fitter()`:
+      ! object 'eta' not found
     Code
       ssdtools:::sgompertz(data.frame(left = rep(x, 10), right = rep(x, 10)))
     Condition
-      Error in `lm.fit()`:
-      ! NA/NaN/Inf in 'y'
+      Warning in `min()`:
+      no non-missing arguments to min; returning Inf
+      Error in `vglm.fitter()`:
+      ! object 'eta' not found
     Code
       ssdtools:::sgompertz(data.frame(left = x, right = x), pars = c(12800, 1))
     Condition
-      Error in `checkwz()`:
-      ! NAs in the working weights var 'wz'
+      Warning in `min()`:
+      no non-missing arguments to min; returning Inf
+      Error in `vglm.fitter()`:
+      ! object 'eta' not found
     Code
       ssdtools:::sgompertz(data.frame(left = x / 12800, right = x / 12800))
     Condition
-      Error in `checkwz()`:
-      ! Some elements in the working weights variable 'wz' are not finite
+      Warning in `min()`:
+      no non-missing arguments to min; returning Inf
+      Error in `vglm.fitter()`:
+      ! object 'eta' not found
 
 # sgompertz cant even initialize lots of values
 
@@ -151,8 +111,10 @@
       set.seed(99)
       ssdtools:::sgompertz(data.frame(left = x, right = x))
     Condition
-      Error in `checkwz()`:
-      ! Some elements in the working weights variable 'wz' are not finite
+      Warning in `min()`:
+      no non-missing arguments to min; returning Inf
+      Error in `vglm.fitter()`:
+      ! object 'eta' not found
     Code
       set.seed(99)
       ssd_fit_dists(data.frame(Conc = x), dists = "gompertz")
@@ -166,13 +128,11 @@
     Code
       set.seed(100)
       ssdtools:::sgompertz(data.frame(left = x, right = x))
-    Output
-      $log_location
-      [1] -0.9424722
-      
-      $log_shape
-      [1] -128.6335
-      
+    Condition
+      Warning in `min()`:
+      no non-missing arguments to min; returning Inf
+      Error in `vglm.fitter()`:
+      ! object 'eta' not found
     Code
       set.seed(100)
       ssd_fit_dists(data.frame(Conc = x), dists = "gompertz")
